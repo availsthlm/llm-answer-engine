@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export default function AccessDenied() {
     return (
-        <div className="mt-24 flex flex-col items-center">
+        <div className="mt-52 flex flex-col items-center">
             <Button
                 size="lg"
                 onClick={(e) => {
