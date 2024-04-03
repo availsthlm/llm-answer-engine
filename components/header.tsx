@@ -28,7 +28,7 @@ export async function Header() {
                         </g>
                     </svg>
                     <span className="block sm:inline text-md sm:text-md lg:text-md font-semibold  text-gray-600">
-                        - by Avail STHLM
+                        - av Avail STHLM
                     </span>
                 </a>
             </span>
