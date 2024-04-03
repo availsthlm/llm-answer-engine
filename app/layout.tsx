@@ -8,16 +8,17 @@ import "./globals.css";
 import { AI } from "./action";
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
+import NextAuthProvider from "@/lib/NextAuthProvider";
 
 const meta = {
-    title: "GNISTA",
-    description: "anwser engine built by developers digest",
+    title: "CHEFx",
+    description: "din personliga assistent för ledarskap",
 };
 export const metadata: Metadata = {
     ...meta,
     title: {
-        default: "GNISTA",
-        template: `%s - answer engine`,
+        default: "CHEFx",
+        template: `%s -din personliga assistent för ledarskap`,
     },
     icons: {
         icon: "/favicon.ico",
@@ -53,26 +54,28 @@ export default function RootLayout({
             <body
                 className={`font-sans antialiased ${GeistSans.variable} ${GeistMono.variable}`}
             >
-                <Toaster />
-                <AI>
-                    <Providers
-                        attribute="class"
-                        defaultTheme="light"
-                        enableSystem={false}
-                        disableTransitionOnChange
-                    >
-                        <div className="flex flex-col min-h-screen">
-                            <Header />
-                            <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4">
-                                {children}
-                            </main>
-                        </div>
-                    </Providers>
-                </AI>
-                <Analytics />
+                <NextAuthProvider>
+                    <Toaster />
+                    <AI>
+                        <Providers
+                            attribute="class"
+                            defaultTheme="light"
+                            enableSystem={false}
+                            disableTransitionOnChange
+                        >
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4">
+                                    {children}
+                                </main>
+                            </div>
+                        </Providers>
+                    </AI>
+                    <Analytics />
+                </NextAuthProvider>
             </body>
         </html>
     );
 }
 
-export const runtime = "edge";
+//export const runtime = "edge";

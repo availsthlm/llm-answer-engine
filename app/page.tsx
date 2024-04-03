@@ -20,6 +20,11 @@ import LLMResponseComponent from "@/components/answer/LLMResponseComponent";
 import ImagesComponent from "@/components/answer/ImagesComponent";
 import VideosComponent from "@/components/answer/VideosComponent";
 import FollowUpComponent from "@/components/answer/FollowUpComponent";
+
+import { authOptions } from "@/lib/auth";
+import { useSession, getSession } from "next-auth/react";
+import AccessDenied from "@/components/AccessDenied";
+
 // 2. Set up types
 interface SearchResult {
     favicon: string;
@@ -61,6 +66,10 @@ interface FollowUp {
     }[];
 }
 export default function Page() {
+    const { data: session, status } = useSession();
+    console.log("status", status);
+
+    console.log("session", session);
     // 3. Set up action that will be used to stream all the messages
     const { myAction } = useActions<typeof AI>();
     // 4. Set up form submission handling
@@ -179,6 +188,8 @@ export default function Page() {
             console.error("Error streaming data for user message:", error);
         }
     };
+    if (status !== "authenticated") return <AccessDenied />;
+
     return (
         <div>
             {messages.length > 0 && (
