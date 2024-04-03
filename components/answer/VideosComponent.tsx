@@ -116,7 +116,7 @@ const VideosComponent: React.FC<VideosComponentProps> = ({ videos }) => {
                         className="bg-gray-100  hover:bg-gray-200  text-black  font-semibold py-2 px-4 rounded shadow"
                         onClick={() => setShowMore(!showMore)}
                     >
-                        {showMore ? "Show Less" : "Show More"}
+                        {showMore ? "Visa färre" : "Visa fler"}
                     </button>
                 </div>
             )}

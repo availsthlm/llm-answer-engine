@@ -59,3 +59,14 @@
         @apply bg-background text-foreground;
     }
 }
+
+.Header__logo {
+    display: block;
+    text-align: center;
+    margin: 0 auto;
+    width: 550px;
+}
+
+.Header__logo svg.icon--chef-logo {
+    width: 260px;
+}
