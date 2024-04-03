@@ -61,10 +61,7 @@
 }
 
 .Header__logo {
-    display: block;
-    text-align: center;
-    margin: 0 auto;
-    width: 550px;
+    text-align: right;
 }
 
 .Header__logo svg.icon--chef-logo {
