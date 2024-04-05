@@ -113,8 +113,6 @@ async function getSourcesFromPinecone(question: string) {
         includeValues: true,
     });
 
-    // Print the results
-    console.log(results.matches?.map((match) => match.metadata));
     return results.matches?.map((match) => ({
         title: match.metadata?.title,
         content: match.metadata?.content,
@@ -387,6 +385,7 @@ async function myAction(userMessage: string): Promise<any> {
     "use server";
     const streamable = createStreamableValue({});
     (async () => {
+        console.log("Getting sources from Pinecone");
         const [articles] = await Promise.all([
             getSourcesFromPinecone(userMessage),
         ]);
@@ -398,6 +397,7 @@ async function myAction(userMessage: string): Promise<any> {
             cover: article.cover,
             score: article.score,
         }));
+        console.log("Found sources from Pinecone:", sources.length);
         streamable.update({ articleResults: sources });
         const vectorResults = articles
             .map((article) => ({
@@ -409,6 +409,8 @@ async function myAction(userMessage: string): Promise<any> {
         //     html,
         //     userMessage
         // );
+        // console.log("Vectorized results:", vectorResults);
+        console.log("Generating Article");
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
@@ -430,6 +432,7 @@ async function myAction(userMessage: string): Promise<any> {
             stream: true,
             model: config.inferenceModel,
         });
+        console.log("Start reading chat completion");
         for await (const chunk of chatCompletion) {
             if (
                 chunk.choices[0].delta &&
@@ -450,6 +453,8 @@ async function myAction(userMessage: string): Promise<any> {
         }
         streamable.done({ status: "done" });
     })();
+    console.log("Returning streamable value");
+
     return streamable.value;
 }
 // 11. Define initial AI and UI states
