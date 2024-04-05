@@ -231,18 +231,18 @@ export default function Page() {
                                         searchResults={message.searchResults}
                                     />
                                 )} */}
-
+                                {message.type === "userMessage" && (
+                                    <UserMessageComponent
+                                        message={message.userMessage}
+                                    />
+                                )}
                                 {message.articleResults && (
                                     <ArticleResultsComponent
                                         key={`articleResults-${index}`}
                                         searchResults={message.articleResults}
                                     />
                                 )}
-                                {message.type === "userMessage" && (
-                                    <UserMessageComponent
-                                        message={message.userMessage}
-                                    />
-                                )}
+
                                 <LLMResponseComponent
                                     llmResponse={message.content}
                                     currentLlmResponse={currentLlmResponse}

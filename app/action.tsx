@@ -390,8 +390,15 @@ async function myAction(userMessage: string): Promise<any> {
         const [articles] = await Promise.all([
             getSourcesFromPinecone(userMessage),
         ]);
-        // streamable.update({ searchResults: sources });
-        streamable.update({ articleResults: articles });
+
+        const sources = articles.map((article) => ({
+            title: article.title,
+            link: article.link,
+            favicon: article.favicon,
+            cover: article.cover,
+            score: article.score,
+        }));
+        streamable.update({ articleResults: sources });
         const vectorResults = articles
             .map((article) => ({
                 content: article.content,
