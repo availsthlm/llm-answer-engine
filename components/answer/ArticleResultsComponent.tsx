@@ -66,7 +66,7 @@ const ArticleResultsComponent = ({
         <div className=" bg-white shadow-lg rounded-lg p-4 mt-4">
             <div className="flex items-center">
                 <h2 className="text-lg font-semibold flex-grow  text-black">
-                    Artiklar
+                    Källor
                 </h2>
             </div>
             <div className="grid grid-cols-2 gap-sm md:grid-cols-4">
