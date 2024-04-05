@@ -85,20 +85,20 @@ const ArticleResultsComponent = ({
                         >
                             <div className="w-full">
                                 <div className="flex group items-stretch w-full relative h-[74px]">
-                                    <div className="rounded-md flex w-full border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-offset dark:bg-offsetDark md:hover:bg-offsetPlus md:dark:hover:bg-offsetPlusDark">
-                                        <div className="relative z-10 flex items max-w-full flex-col justify-between h-full pointer-events-none select-none px-sm pt-sm pb-xs">
+                                    <div className="rounded-md flex w-full  transition duration-300 bg-offset md:hover:bg-slate-200">
+                                        <div className="relative z-10 flex items max-w-full flex-row justify-between h-full pointer-events-none select-none px-2 pt-2 pb-2">
                                             {!loadedFavicons[index] && (
-                                                <div className="w-5 h-5  bg-gray-400 rounded animate-pulse"></div>
+                                                <div className="w-12 h-12  bg-gray-400 rounded animate-pulse"></div>
                                             )}
                                             <img
                                                 src={result.favicon}
                                                 alt="favicon"
-                                                className={`w-10 h-10 ${loadedFavicons[index] ? "block" : "hidden"}`}
+                                                className={`w-12 h-12 ${loadedFavicons[index] ? "block" : "hidden"}`}
                                                 onLoad={() =>
                                                     handleFaviconLoad(index)
                                                 }
                                             />
-                                            <div className="line-clamp-2 grow default font-sans text-xs font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
+                                            <div className="line-clamp-2 grow  font-sans text-xs font-medium text-black selection:bg-slate-200 selection:text-gray pl-2">
                                                 {result.title}
                                             </div>
                                         </div>
@@ -113,27 +113,17 @@ const ArticleResultsComponent = ({
                     <div className="w-full sm:w-full md:w-1/4 p-2">
                         <div
                             onClick={toggleExpansion}
-                            className="flex items-center space-x-2  bg-gray-100 p-3 rounded-lg cursor-pointer h-12 justify-center"
+                            className="flex items-center space-x-3  bg-gray-100 p-3 rounded-lg cursor-pointer h-12 justify-center"
                         >
                             {!isExpanded ? (
                                 <>
-                                    {searchResults
-                                        .slice(0, 3)
-                                        .map((result, index) => (
-                                            <img
-                                                key={index}
-                                                src={result.favicon}
-                                                alt="favicon"
-                                                className="w-10 h-10"
-                                            />
-                                        ))}
-                                    <span className="text-sm font-semibold  text-gray-700">
-                                        Visa mer
+                                    <span className="text-xs font-semibold  text-gray-700">
+                                        Visa fler
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-sm font-semibold  text-gray-700">
-                                    Visa mindre
+                                <span className="text-xs font-semibold  text-gray-700">
+                                    Visa färre
                                 </span>
                             )}
                         </div>

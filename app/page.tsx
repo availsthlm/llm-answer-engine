@@ -38,6 +38,7 @@ interface Message {
     userMessage: string;
     images: Image[];
     videos: Video[];
+    cover: string;
     followUp: FollowUp | null;
     isStreaming: boolean;
     searchResults?: SearchResult[];
@@ -50,12 +51,14 @@ interface StreamMessage {
     llmResponse?: string;
     llmResponseEnd?: boolean;
     images?: any;
+    cover?: any;
     videos?: any;
     followUp?: any;
 }
 interface Image {
     link: string;
 }
+
 interface Video {
     link: string;
     imageUrl: string;
@@ -134,6 +137,7 @@ export default function Page() {
             userMessage: userMessage,
             content: "",
             images: [],
+            cover: "",
             videos: [],
             followUp: null,
             isStreaming: true,
@@ -145,7 +149,6 @@ export default function Page() {
             const streamableValue = await myAction(userMessage);
             let llmResponseString = "";
             for await (const message of readStreamableValue(streamableValue)) {
-                console.log("streamableValue message", message);
                 const typedMessage = message as StreamMessage;
                 setMessages((prevMessages) => {
                     const messagesCopy = [...prevMessages];
@@ -174,6 +177,13 @@ export default function Page() {
                         if (typedMessage.articleResults) {
                             currentMessage.articleResults =
                                 typedMessage.articleResults;
+                            currentMessage.cover =
+                                typedMessage.articleResults.reduce(
+                                    (prev: any, current: any) =>
+                                        prev.score > current.score
+                                            ? prev
+                                            : current
+                                ).cover;
                         }
                         if (
                             typedMessage.images &&
@@ -221,6 +231,7 @@ export default function Page() {
                                         searchResults={message.searchResults}
                                     />
                                 )} */}
+
                                 {message.articleResults && (
                                     <ArticleResultsComponent
                                         key={`articleResults-${index}`}
@@ -236,6 +247,7 @@ export default function Page() {
                                     llmResponse={message.content}
                                     currentLlmResponse={currentLlmResponse}
                                     index={index}
+                                    imageUrl={message.cover}
                                     key={`llm-response-${index}`}
                                 />
                                 {message.followUp && (

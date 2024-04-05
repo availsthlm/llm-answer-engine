@@ -2,6 +2,7 @@
 interface LLMResponseComponentProps {
     llmResponse: string;
     currentLlmResponse: string;
+    imageUrl: string;
     index: number;
 }
 
@@ -32,7 +33,8 @@ const StreamingComponent = ({
                     <div className=" text-gray-800">
                         <Markdown
                             components={{
-                                h1: "h2",
+                                h1: "h3",
+                                h2: "h3",
                                 h3: "h4",
                                 p(props) {
                                     const { node, ...rest } = props;
@@ -41,12 +43,6 @@ const StreamingComponent = ({
                                             style={{ padding: "12px" }}
                                             {...rest}
                                         />
-                                    );
-                                },
-                                em(props) {
-                                    const { node, ...rest } = props;
-                                    return (
-                                        <i style={{ color: "red" }} {...rest} />
                                     );
                                 },
                             }}
@@ -64,6 +60,7 @@ const StreamingComponent = ({
 const LLMResponseComponent = ({
     llmResponse,
     currentLlmResponse,
+    imageUrl,
     index,
 }: LLMResponseComponentProps) => {
     // 5. Check if 'llmResponse' is not empty
@@ -74,18 +71,21 @@ const LLMResponseComponent = ({
             {hasLlmResponse ? (
                 // 6. If 'llmResponse' is not empty, render a div with the 'Markdown' component
                 <div className=" bg-white shadow-lg rounded-lg p-4 mt-4">
-                    <div className="flex items-center mb-5">
-                        <img
-                            src="https://dlejuzwq61njn.cloudfront.net/wp-content/uploads/2021/02/11102943/Lonesamtal1800-640x360.jpg"
-                            alt="favicon"
-                            className="w-full block"
-                        />
-                    </div>
+                    {imageUrl && (
+                        <div className="flex items-center mb-5">
+                            <img
+                                src={imageUrl}
+                                alt="ChefX"
+                                className="w-full block"
+                            />
+                        </div>
+                    )}
                     <div className=" text-gray-800">
                         <Markdown
                             components={{
-                                h1: "h2",
-                                h3: "h2",
+                                h1: "h3",
+                                h2: "h3",
+                                h3: "h4",
                                 p(props) {
                                     const { node, ...rest } = props;
                                     return (
@@ -96,12 +96,6 @@ const LLMResponseComponent = ({
                                     );
                                 },
                                 strong: "h4",
-                                em(props) {
-                                    const { node, ...rest } = props;
-                                    return (
-                                        <i style={{ color: "red" }} {...rest} />
-                                    );
-                                },
                             }}
                         >
                             {llmResponse}

@@ -108,27 +108,19 @@ async function getSourcesFromPinecone(question: string) {
     // Query the index using the query embedding
     const results = await index.query({
         vector: query,
-        topK: 1,
+        topK: 6,
         includeMetadata: true,
         includeValues: true,
     });
 
     // Print the results
-    console.log(
-        results.matches?.map((match) => ({
-            title: match.metadata?.title,
-            content: match.metadata?.content,
-            link: match.metadata?.link,
-            thumbnail: match.metadata?.thumbnail_url,
-            cover: match.metadata?.full_image_url,
-            score: match.score,
-        }))
-    );
+    console.log(results.matches?.map((match) => match.metadata));
     return results.matches?.map((match) => ({
         title: match.metadata?.title,
         content: match.metadata?.content,
         link: match.metadata?.link,
         favicon: match.metadata?.thumbnail_url,
+        cover: match.metadata?.full_image_url,
         score: match.score,
     }));
 }
@@ -363,7 +355,7 @@ async function getVideos(
     }
 }
 // 9. Generate follow-up questions using OpenAI API
-const relevantQuestions = async (sources: SearchResult[]): Promise<any> => {
+const relevantQuestions = async (sources: string[]): Promise<any> => {
     return await openai.chat.completions.create({
         messages: [
             {
@@ -413,19 +405,19 @@ async function myAction(userMessage: string): Promise<any> {
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist på en stor nyhetsredaktion. Du har precis fått i uppdrag att skriva en artikel som besvarar frågan: ${userMessage},
-                        Ditt svar ska vara strukturerat som en nyhetsartikel på 500 ord. 
+                content: `Du är en erfaren journalist på en stor nyhetsredaktion som precis fått i uppdrag att skriva en artikel på 500 ord som besvarar frågan: ${userMessage},
+                        Använd en objektiv och informativ ton.
+                        Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning.
                         Exkludera datum och byline. 
                         Använd markdown format i din text. Detta är mycket viktigt! 
-                        En bra artikel kommer lyfta din karriär till nya höjder. Lycka till! 
                        `,
             },
             {
                 role: "user",
-                content: ` -Använd endast information nedan för att skriva artikeln: \n ${JSON.stringify(vectorResults)}. `,
+                content: `Använd endast information efter CONTEXT för att skriva artikeln. Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  CONTEXT: ${JSON.stringify(vectorResults)}. `,
             },
         ];
-        console.log("messages", JSON.stringify(messages));
+
         const chatCompletion = await openai.chat.completions.create({
             messages: messages,
             stream: true,
@@ -443,10 +435,12 @@ async function myAction(userMessage: string): Promise<any> {
                 streamable.update({ llmResponseEnd: true });
             }
         }
-        // if (!config.useOllamaInference) {
-        //     const followUp = await relevantQuestions(sources);
-        //     streamable.update({ followUp: followUp });
-        // }
+        if (!config.useOllamaInference) {
+            const followUp = await relevantQuestions(
+                articles.map((article) => article.content)
+            );
+            streamable.update({ followUp: followUp });
+        }
         streamable.done({ status: "done" });
     })();
     return streamable.value;
