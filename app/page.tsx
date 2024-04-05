@@ -20,6 +20,7 @@ import LLMResponseComponent from "@/components/answer/LLMResponseComponent";
 import ImagesComponent from "@/components/answer/ImagesComponent";
 import VideosComponent from "@/components/answer/VideosComponent";
 import FollowUpComponent from "@/components/answer/FollowUpComponent";
+import ArticleResultsComponent from "@/components/answer/ArticleResultsComponent";
 
 import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
@@ -40,8 +41,10 @@ interface Message {
     followUp: FollowUp | null;
     isStreaming: boolean;
     searchResults?: SearchResult[];
+    articleResults?: SearchResult[];
 }
 interface StreamMessage {
+    articleResults?: any;
     searchResults?: any;
     userMessage?: string;
     llmResponse?: string;
@@ -142,6 +145,7 @@ export default function Page() {
             const streamableValue = await myAction(userMessage);
             let llmResponseString = "";
             for await (const message of readStreamableValue(streamableValue)) {
+                console.log("streamableValue message", message);
                 const typedMessage = message as StreamMessage;
                 setMessages((prevMessages) => {
                     const messagesCopy = [...prevMessages];
@@ -160,14 +164,27 @@ export default function Page() {
                         if (typedMessage.llmResponseEnd) {
                             currentMessage.isStreaming = false;
                         }
-                        if (typedMessage.searchResults) {
+                        if (
+                            typedMessage.searchResults &&
+                            typedMessage.searchResults.length > 0
+                        ) {
                             currentMessage.searchResults =
                                 typedMessage.searchResults;
                         }
-                        if (typedMessage.images) {
+                        if (typedMessage.articleResults) {
+                            currentMessage.articleResults =
+                                typedMessage.articleResults;
+                        }
+                        if (
+                            typedMessage.images &&
+                            typedMessage.images.length > 0
+                        ) {
                             currentMessage.images = [...typedMessage.images];
                         }
-                        if (typedMessage.videos) {
+                        if (
+                            typedMessage.videos &&
+                            typedMessage.videos.length > 0
+                        ) {
                             currentMessage.videos = [...typedMessage.videos];
                         }
                         if (typedMessage.followUp) {
@@ -185,7 +202,8 @@ export default function Page() {
             console.error("Error streaming data for user message:", error);
         }
     };
-    if (status !== "authenticated") return <AccessDenied />;
+    if (status !== "authenticated" && status !== "loading")
+        return <AccessDenied />;
 
     return (
         <div>
@@ -194,13 +212,19 @@ export default function Page() {
                     {messages.map((message, index) => (
                         <div
                             key={`message-${index}`}
-                            className="flex flex-col md:flex-row"
+                            className="flex flex-col items-center"
                         >
-                            <div className="w-full md:w-3/4 md:pr-2">
-                                {message.searchResults && (
+                            <div className="w-full md:w-2/4 md:pr-2">
+                                {/* {message.searchResults && (
                                     <SearchResultsComponent
                                         key={`searchResults-${index}`}
                                         searchResults={message.searchResults}
+                                    />
+                                )} */}
+                                {message.articleResults && (
+                                    <ArticleResultsComponent
+                                        key={`articleResults-${index}`}
+                                        searchResults={message.articleResults}
                                     />
                                 )}
                                 {message.type === "userMessage" && (
@@ -226,7 +250,7 @@ export default function Page() {
                                     </div>
                                 )}
                             </div>
-                            <div className="w-full md:w-1/4 lg:pl-2">
+                            {/* <div className="w-full md:w-1/4 lg:pl-2">
                                 {message.videos && (
                                     <VideosComponent
                                         key={`videos-${index}`}
@@ -239,7 +263,7 @@ export default function Page() {
                                         images={message.images}
                                     />
                                 )}
-                            </div>
+                            </div> */}
                         </div>
                     ))}
                 </div>

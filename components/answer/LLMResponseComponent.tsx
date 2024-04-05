@@ -28,7 +28,32 @@ const StreamingComponent = ({
                             className="w-6 h-6"
                         />
                     </div>
-                    <div className=" text-gray-800">{currentLlmResponse}</div>
+
+                    <div className=" text-gray-800">
+                        <Markdown
+                            components={{
+                                h1: "h2",
+                                h3: "h4",
+                                p(props) {
+                                    const { node, ...rest } = props;
+                                    return (
+                                        <p
+                                            style={{ padding: "12px" }}
+                                            {...rest}
+                                        />
+                                    );
+                                },
+                                em(props) {
+                                    const { node, ...rest } = props;
+                                    return (
+                                        <i style={{ color: "red" }} {...rest} />
+                                    );
+                                },
+                            }}
+                        >
+                            {currentLlmResponse}
+                        </Markdown>
+                    </div>
                 </div>
             )}
         </>
@@ -49,13 +74,38 @@ const LLMResponseComponent = ({
             {hasLlmResponse ? (
                 // 6. If 'llmResponse' is not empty, render a div with the 'Markdown' component
                 <div className=" bg-white shadow-lg rounded-lg p-4 mt-4">
-                    <div className="flex items-center">
-                        <h2 className="text-lg font-semibold flex-grow  text-black">
-                            Svar
-                        </h2>
+                    <div className="flex items-center mb-5">
+                        <img
+                            src="https://dlejuzwq61njn.cloudfront.net/wp-content/uploads/2021/02/11102943/Lonesamtal1800-640x360.jpg"
+                            alt="favicon"
+                            className="w-full block"
+                        />
                     </div>
                     <div className=" text-gray-800">
-                        <Markdown>{llmResponse}</Markdown>
+                        <Markdown
+                            components={{
+                                h1: "h2",
+                                h3: "h2",
+                                p(props) {
+                                    const { node, ...rest } = props;
+                                    return (
+                                        <p
+                                            style={{ paddingBottom: "12px" }}
+                                            {...rest}
+                                        />
+                                    );
+                                },
+                                strong: "h4",
+                                em(props) {
+                                    const { node, ...rest } = props;
+                                    return (
+                                        <i style={{ color: "red" }} {...rest} />
+                                    );
+                                },
+                            }}
+                        >
+                            {llmResponse}
+                        </Markdown>
                     </div>
                 </div>
             ) : (

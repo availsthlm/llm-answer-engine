@@ -2,6 +2,7 @@
 import "server-only";
 import { createAI, createStreamableValue } from "ai/rsc";
 import { OpenAI } from "openai";
+import { Pinecone } from "@pinecone-database/pinecone";
 import cheerio from "cheerio";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
@@ -10,6 +11,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
 // 1.5 Configuration file for inference model, embeddings model, and other parameters
 import { config } from "./config";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 // 2. Determine which embeddings mode and which inference model to use based on the config.tsx. Currently suppport for OpenAI, Groq and partial support for Ollama embeddings and inference
 let openai: OpenAI;
 if (config.useOllamaInference) {
@@ -23,6 +25,11 @@ if (config.useOllamaInference) {
         apiKey: config.inferenceAPIKey,
     });
 }
+
+const pineconeClient = new Pinecone({
+    apiKey: config.pineconeApiKey as string,
+});
+
 // 2.5 Set up the embeddings model based on the config.tsx
 let embeddings: OllamaEmbeddings | OpenAIEmbeddings;
 if (config.useOllamaEmbeddings) {
@@ -41,6 +48,13 @@ interface SearchResult {
     link: string;
     snippet: string;
     favicon: string;
+}
+
+interface ArticleResult {
+    title: string;
+    link: string;
+    content: string;
+    image: string;
 }
 interface ContentResult extends SearchResult {
     html: string;
@@ -82,6 +96,41 @@ async function getSources(
         console.error("Error fetching search results:", error);
         throw error;
     }
+}
+
+async function getSourcesFromPinecone(question: string) {
+    // Target the index
+    const indexName = "chef-artiklar";
+    const index = pineconeClient.index<any>(indexName);
+
+    const query = await embeddings.embedQuery(question);
+
+    // Query the index using the query embedding
+    const results = await index.query({
+        vector: query,
+        topK: 1,
+        includeMetadata: true,
+        includeValues: true,
+    });
+
+    // Print the results
+    console.log(
+        results.matches?.map((match) => ({
+            title: match.metadata?.title,
+            content: match.metadata?.content,
+            link: match.metadata?.link,
+            thumbnail: match.metadata?.thumbnail_url,
+            cover: match.metadata?.full_image_url,
+            score: match.score,
+        }))
+    );
+    return results.matches?.map((match) => ({
+        title: match.metadata?.title,
+        content: match.metadata?.content,
+        link: match.metadata?.link,
+        favicon: match.metadata?.thumbnail_url,
+        score: match.score,
+    }));
 }
 // 5. Fetch contents of top 10 search results
 async function get10BlueLinksContents(
@@ -346,31 +395,39 @@ async function myAction(userMessage: string): Promise<any> {
     "use server";
     const streamable = createStreamableValue({});
     (async () => {
-        const [images, sources, videos] = await Promise.all([
-            getImages(userMessage),
-            getSources(userMessage),
-            getVideos(userMessage),
+        const [articles] = await Promise.all([
+            getSourcesFromPinecone(userMessage),
         ]);
-        streamable.update({ searchResults: sources });
-        streamable.update({ images: images });
-        streamable.update({ videos: videos });
-        const html = await get10BlueLinksContents(sources);
-        const vectorResults = await processAndVectorizeContent(
-            html,
-            userMessage
-        );
+        // streamable.update({ searchResults: sources });
+        streamable.update({ articleResults: articles });
+        const vectorResults = articles
+            .map((article) => ({
+                content: article.content,
+            }))
+            .join("/n");
+        // const html = await get10BlueLinksContents(sources);
+        // const vectorResults = await processAndVectorizeContent(
+        //     html,
+        //     userMessage
+        // );
+        const messages: ChatCompletionMessageParam[] = [
+            {
+                role: "system",
+                content: `Du är en erfaren journalist på en stor nyhetsredaktion. Du har precis fått i uppdrag att skriva en artikel som besvarar frågan: ${userMessage},
+                        Ditt svar ska vara strukturerat som en nyhetsartikel på 500 ord. 
+                        Exkludera datum och byline. 
+                        Använd markdown format i din text. Detta är mycket viktigt! 
+                        En bra artikel kommer lyfta din karriär till nya höjder. Lycka till! 
+                       `,
+            },
+            {
+                role: "user",
+                content: ` -Använd endast information nedan för att skriva artikeln: \n ${JSON.stringify(vectorResults)}. `,
+            },
+        ];
+        console.log("messages", JSON.stringify(messages));
         const chatCompletion = await openai.chat.completions.create({
-            messages: [
-                {
-                    role: "system",
-                    content: `
-       - Här är min fråga "${userMessage}", svara tillbaka med ett så långt svar som möjligt. Om du inte hittar några relevanta resultat, svara med "Inga relevanta resultat hittades." `,
-                },
-                {
-                    role: "user",
-                    content: ` -Här är de bästa resultaten från en similarity search: ${JSON.stringify(vectorResults)}. `,
-                },
-            ],
+            messages: messages,
             stream: true,
             model: config.inferenceModel,
         });
@@ -386,10 +443,10 @@ async function myAction(userMessage: string): Promise<any> {
                 streamable.update({ llmResponseEnd: true });
             }
         }
-        if (!config.useOllamaInference) {
-            const followUp = await relevantQuestions(sources);
-            streamable.update({ followUp: followUp });
-        }
+        // if (!config.useOllamaInference) {
+        //     const followUp = await relevantQuestions(sources);
+        //     streamable.update({ followUp: followUp });
+        // }
         streamable.done({ status: "done" });
     })();
     return streamable.value;

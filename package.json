@@ -13,6 +13,7 @@
   "dependencies": {
     "@langchain/community": "^0.0.40",
     "@langchain/openai": "^0.0.25",
+    "@pinecone-database/pinecone": "^2.2.0",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-separator": "^1.0.3",
@@ -33,6 +34,7 @@
     "next-auth": "^4.24.7",
     "next-themes": "^0.2.1",
     "openai": "^4.28.4",
+    "pinecone-client": "^2.0.0",
     "react": "^18",
     "react-dom": "^18",
     "react-intersection-observer": "^9.8.0",

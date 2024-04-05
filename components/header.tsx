@@ -3,9 +3,8 @@ import { useSession } from "next-auth/react";
 
 export function Header() {
     const { data: session, status } = useSession();
-    console.log("session", status);
     return (
-        <header className="sticky z-50 flex justify-between w-full px-4 py-4 shrink-0  backdrop-blur-xl">
+        <header className="sticky z-50 flex justify-around w-full px-4 py-4 shrink-0  backdrop-blur-xl">
             <a
                 href="https://availsthlm.se"
                 rel="noopener"
@@ -35,7 +34,7 @@ export function Header() {
 
             <div>
                 {status === "authenticated" && (
-                    <span>Inloggad som {session?.user?.name}</span>
+                    <span>Hej {session?.user?.name}</span>
                 )}
             </div>
         </header>
