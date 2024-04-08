@@ -8,7 +8,6 @@ import "./globals.css";
 import { AI } from "./action";
 import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
-import NextAuthProvider from "@/lib/NextAuthProvider";
 
 const meta = {
     title: "CHEFx",
@@ -54,25 +53,23 @@ export default function RootLayout({
             <body
                 className={`font-sans antialiased ${GeistSans.variable} ${GeistMono.variable}`}
             >
-                <NextAuthProvider>
-                    <Toaster />
-                    <AI>
-                        <Providers
-                            attribute="class"
-                            defaultTheme="light"
-                            enableSystem={false}
-                            disableTransitionOnChange
-                        >
-                            <div className="flex flex-col min-h-screen">
-                                <Header />
-                                <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4">
-                                    {children}
-                                </main>
-                            </div>
-                        </Providers>
-                    </AI>
-                    <Analytics />
-                </NextAuthProvider>
+                <Toaster />
+                <AI>
+                    <Providers
+                        attribute="class"
+                        defaultTheme="light"
+                        enableSystem={false}
+                        disableTransitionOnChange
+                    >
+                        <div className="flex flex-col min-h-screen">
+                            <Header />
+                            <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4">
+                                {children}
+                            </main>
+                        </div>
+                    </Providers>
+                </AI>
+                <Analytics />
             </body>
         </html>
     );
