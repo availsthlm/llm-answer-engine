@@ -22,7 +22,7 @@ import VideosComponent from "@/components/answer/VideosComponent";
 import FollowUpComponent from "@/components/answer/FollowUpComponent";
 import ArticleResultsComponent from "@/components/answer/ArticleResultsComponent";
 
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
 
 // 2. Set up types
@@ -71,7 +71,7 @@ interface FollowUp {
     }[];
 }
 export default function Page() {
-    const { data: session, status } = useSession();
+    //const { data: session, status } = useSession();
 
     // 3. Set up action that will be used to stream all the messages
     const { myAction } = useActions<typeof AI>();
@@ -212,8 +212,8 @@ export default function Page() {
             console.error("Error streaming data for user message:", error);
         }
     };
-    if (status !== "authenticated" && status !== "loading")
-        return <AccessDenied />;
+    // if (status !== "authenticated" && status !== "loading")
+    //     return <AccessDenied />;
 
     return (
         <div>
