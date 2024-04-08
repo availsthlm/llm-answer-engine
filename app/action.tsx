@@ -14,6 +14,9 @@ import { config } from "./config";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 // 2. Determine which embeddings mode and which inference model to use based on the config.tsx. Currently suppport for OpenAI, Groq and partial support for Ollama embeddings and inference
 let openai: OpenAI;
+
+console.log("config", JSON.stringify(config));
+
 if (config.useOllamaInference) {
     openai = new OpenAI({
         baseURL: config.ollamaBaseUrl,
