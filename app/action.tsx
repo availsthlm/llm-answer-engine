@@ -458,7 +458,12 @@ async function myAction(userMessage: string): Promise<any> {
     })();
     console.log("Returning streamable value");
 
-    return streamable.value;
+    return new Response(null, {
+        headers: {
+            "Content-Type": "text/event-stream",
+            "X-Content-Type-Options": "nosniff",
+        },
+    });
 }
 // 11. Define initial AI and UI states
 const initialAIState: {
