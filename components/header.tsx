@@ -1,8 +1,8 @@
 "use client";
-import { useSession } from "next-auth/react";
+//import { useSession } from "next-auth/react";
 
 export function Header() {
-    const { data: session, status } = useSession();
+    // const { data: session, status } = useSession();
     return (
         <header className="sticky z-50 flex justify-around w-full px-4 py-4 shrink-0  backdrop-blur-xl">
             <a
@@ -31,12 +31,12 @@ export function Header() {
                     - av Avail STHLM
                 </span>
             </a>
-
+            {/* 
             <div>
                 {status === "authenticated" && (
                     <span>Hej {session?.user?.name}</span>
                 )}
-            </div>
+            </div> */}
         </header>
     );
 }
