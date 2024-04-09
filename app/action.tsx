@@ -414,9 +414,14 @@ async function myAction(userMessage: string): Promise<any> {
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist, på en tidning riktad mot chefer och befattningshavare, som precis fått i uppdrag att skriva en artikel på 500 ord som besvarar frågan: ${userMessage},
+                content: `Du är en erfaren journalist, på en tidning riktad mot chefer och befattningshavare, som precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
                         Använd en objektiv och informativ ton.
-                        Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning.
+                        Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning: 
+                        ## Rubrik 
+                        ** ingress text **
+                        Huvudelen ska vara uppdelad i stycken och innehålla fakta och citat.
+                        Avslutningen ska sammanfatta artikeln och ge en tydlig slutsats.
+
                         Exkludera datum och byline. 
                         Använd markdown format i din text. Detta är mycket viktigt! 
                        `,
