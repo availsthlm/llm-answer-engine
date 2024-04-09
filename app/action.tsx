@@ -388,7 +388,6 @@ async function myAction(userMessage: string): Promise<any> {
     "use server";
     const streamable = createStreamableValue({});
     (async () => {
-        console.log("Getting sources from Pinecone");
         const [articles] = await Promise.all([
             getSourcesFromPinecone(userMessage),
         ]);
@@ -400,7 +399,6 @@ async function myAction(userMessage: string): Promise<any> {
             cover: article.cover,
             score: article.score,
         }));
-        console.log("Found sources from Pinecone:", sources.length);
         streamable.update({ articleResults: sources });
         const vectorResults = articles
             .map((article) => ({
@@ -413,11 +411,10 @@ async function myAction(userMessage: string): Promise<any> {
         //     userMessage
         // );
         // console.log("Vectorized results:", vectorResults);
-        console.log("Generating Article");
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist på en stor nyhetsredaktion som precis fått i uppdrag att skriva en artikel på 500 ord som besvarar frågan: ${userMessage},
+                content: `Du är en erfaren journalist, på en tidning riktad mot chefer och befattningshavare, som precis fått i uppdrag att skriva en artikel på 500 ord som besvarar frågan: ${userMessage},
                         Använd en objektiv och informativ ton.
                         Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning.
                         Exkludera datum och byline. 
