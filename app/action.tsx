@@ -356,7 +356,10 @@ async function getVideos(
     }
 }
 // 9. Generate follow-up questions using OpenAI API
-const relevantQuestions = async (sources: string[]): Promise<any> => {
+const relevantQuestions = async (
+    originalQuestion: string,
+    sources: string[]
+): Promise<any> => {
     return await openai.chat.completions.create({
         messages: [
             {
@@ -365,7 +368,7 @@ const relevantQuestions = async (sources: string[]): Promise<any> => {
           Du är en frågegenerator som genererar en array med 3 uppföljningsfrågor i JSON-format.
           The JSON schema should include:
           {
-            "original": "Den ursprungliga sökfrågan eller sammanhanget",
+            "original": ${originalQuestion},
             "followUp": [
               "Fråga 1",
               "Fråga 2",
@@ -376,7 +379,7 @@ const relevantQuestions = async (sources: string[]): Promise<any> => {
             },
             {
                 role: "user",
-                content: `Generera uppföljningsfrågor baserat på de bästa resultaten från: ${JSON.stringify(sources)}. Den ursprungliga sökfrågan är: "Den ursprungliga sökfrågan".`,
+                content: `Generera uppföljningsfrågor baserat på de bästa resultaten från: ${JSON.stringify(sources)}. Den ursprungliga sökfrågan är: ${originalQuestion}.`,
             },
         ],
         model: config.inferenceModel,
@@ -452,6 +455,7 @@ async function myAction(userMessage: string): Promise<any> {
         }
         if (!config.useOllamaInference) {
             const followUp = await relevantQuestions(
+                userMessage,
                 articles.map((article) => article.content)
             );
             streamable.update({ followUp: followUp });
