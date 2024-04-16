@@ -177,12 +177,10 @@ export default function Page() {
                         if (typedMessage.articleResults) {
                             currentMessage.articleResults =
                                 typedMessage.articleResults;
-                            currentMessage.cover =
-                                typedMessage.articleResults.reduce(
-                                    (prev: any, current: any) =>
-                                        prev.score > current.score
-                                            ? prev
-                                            : current
+                            currentMessage.cover = typedMessage.articleResults
+                                .filter((article: any) => article.cover !== "")
+                                .reduce((prev: any, current: any) =>
+                                    prev.score > current.score ? prev : current
                                 ).cover;
                         }
                         if (
