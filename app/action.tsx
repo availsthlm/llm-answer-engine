@@ -417,7 +417,8 @@ async function myAction(userMessage: string): Promise<any> {
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist, på en tidning riktad mot chefer och befattningshavare, som precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
+                content: `Du är en erfaren journalist på tidningen Chef och precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
+                        Tänk på att Chef är en tidnind inrikat på ledarskap och karriär.
                         Använd en objektiv och informativ ton.
                         Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning: 
                         ## Rubrik 
