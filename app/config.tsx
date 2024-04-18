@@ -5,7 +5,7 @@
 // - IMPORTANT: Follow-up questions are not yet implrmented with Ollama models, only OpenAI compatible models that use  {type: "json_object"}
 
 const useGroq = process.env.USE_GROQ === "1";
-console.log("USE_GROQ", useGroq);
+
 export const config = {
     useOllamaInference: false,
     useOllamaEmbeddings: false,

@@ -21,7 +21,7 @@ import ImagesComponent from "@/components/answer/ImagesComponent";
 import VideosComponent from "@/components/answer/VideosComponent";
 import FollowUpComponent from "@/components/answer/FollowUpComponent";
 import ArticleResultsComponent from "@/components/answer/ArticleResultsComponent";
-
+import { useCookies } from "next-client-cookies";
 //import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
 
@@ -70,9 +70,9 @@ interface FollowUp {
         };
     }[];
 }
-export default function Page() {
-    //const { data: session, status } = useSession();
 
+export default function Page() {
+    const cookies = useCookies();
     // 3. Set up action that will be used to stream all the messages
     const { myAction } = useActions<typeof AI>();
     // 4. Set up form submission handling
@@ -129,7 +129,6 @@ export default function Page() {
     const handleUserMessageSubmission = async (
         userMessage: string
     ): Promise<void> => {
-        console.log("handleUserMessageSubmission", userMessage);
         const newMessageId = Date.now();
         const newMessage = {
             id: newMessageId,
@@ -210,8 +209,7 @@ export default function Page() {
             console.error("Error streaming data for user message:", error);
         }
     };
-    // if (status !== "authenticated" && status !== "loading")
-    //     return <AccessDenied />;
+    if (!cookies.get("auth")) return <AccessDenied />;
 
     return (
         <div>
