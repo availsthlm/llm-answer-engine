@@ -6,6 +6,7 @@ export interface SearchResult {
     favicon: string;
     link: string;
     title: string;
+    date: string;
 }
 
 // 3. Define the 'SearchResultsComponentProps' interface with a 'searchResults' property of type 'SearchResult[]'
@@ -98,8 +99,13 @@ const ArticleResultsComponent = ({
                                                     handleFaviconLoad(index)
                                                 }
                                             />
-                                            <div className="line-clamp-2 grow  font-sans text-xs font-medium text-black selection:bg-slate-200 selection:text-gray pl-2">
-                                                {result.title}
+                                            <div>
+                                                <div className="line-clamp-2 grow  font-sans text-xs font-medium text-black selection:bg-slate-200 selection:text-gray pl-2">
+                                                    {result.title}
+                                                </div>
+                                                <div className="line-clamp-2 grow  font-sans text-xs font-thin text-black selection:bg-slate-200 selection:text-gray pl-2">
+                                                    {result.date}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

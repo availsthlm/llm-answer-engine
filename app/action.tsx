@@ -103,7 +103,7 @@ async function getSources(
 
 async function getSourcesFromPinecone(question: string) {
     // Target the index
-    const indexName = "chef-artiklar";
+    const indexName = "land-artiklar";
     const index = pineconeClient.index<any>(indexName);
 
     const query = await embeddings.embedQuery(question);
@@ -120,8 +120,9 @@ async function getSourcesFromPinecone(question: string) {
         title: match.metadata?.title,
         content: match.metadata?.content,
         link: match.metadata?.link,
-        favicon: match.metadata?.thumbnail_url,
+        favicon: match.metadata?.full_image_url,
         cover: match.metadata?.full_image_url,
+        date: match.metadata?.date,
         score: match.score,
     }));
 }
@@ -400,12 +401,13 @@ async function myAction(userMessage: string): Promise<any> {
             link: article.link,
             favicon: article.favicon,
             cover: article.cover,
+            date: article.date,
             score: article.score,
         }));
         streamable.update({ articleResults: sources });
         const vectorResults = articles
             .map((article) => ({
-                content: article.content,
+                content: article.title + " - " + article.content,
             }))
             .join("/n");
         // const html = await get10BlueLinksContents(sources);
@@ -417,8 +419,7 @@ async function myAction(userMessage: string): Promise<any> {
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
-                        Tänk på att Chef är en tidning inrikat på ledarskap och karriär.
+                content: `Du är en erfaren journalist på tidningen Land och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
                         Använd en objektiv och informativ ton.
                         Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning: 
                         ## Rubrik 

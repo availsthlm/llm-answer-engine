@@ -11,14 +11,14 @@ import { Header } from "@/components/header";
 import { Providers } from "@/components/providers";
 
 const meta = {
-    title: "CHEFx",
-    description: "din personliga assistent för ledarskap",
+    title: "LandX",
+    description: "",
 };
 export const metadata: Metadata = {
     ...meta,
     title: {
-        default: "CHEFx",
-        template: `%s -din personliga assistent för ledarskap`,
+        default: "LandX",
+        template: `%s`,
     },
     icons: {
         icon: "/favicon.ico",
