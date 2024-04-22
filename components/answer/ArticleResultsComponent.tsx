@@ -6,7 +6,7 @@ export interface SearchResult {
     favicon: string;
     link: string;
     title: string;
-    date: string;
+    date?: string;
 }
 
 // 3. Define the 'SearchResultsComponentProps' interface with a 'searchResults' property of type 'SearchResult[]'
