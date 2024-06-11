@@ -65,7 +65,7 @@ interface ContentResult extends SearchResult {
 
 async function getSourcesFromPinecone(question: string) {
     // Target the index
-    const indexName = "chef-artiklar";
+    const indexName = "chef-index";
     const index = pineconeClient.index<any>(indexName);
 
     const query = await embeddings.embedQuery(question);
@@ -73,7 +73,7 @@ async function getSourcesFromPinecone(question: string) {
     // Query the index using the query embedding
     const results = await index.query({
         vector: query,
-        topK: 2,
+        topK: 6,
         includeMetadata: true,
         includeValues: true,
     });
@@ -176,7 +176,7 @@ async function myAction(userMessage: string): Promise<any> {
     "use server";
     //Array of queries
     const queries = await rewriteQuery(userMessage);
-
+    //console.log("Queries", queries);
     const streamable = createStreamableValue({});
     (async () => {
         const [articles, articles2, articles3, articles4] = await Promise.all([
@@ -187,28 +187,37 @@ async function myAction(userMessage: string): Promise<any> {
         ]);
 
         const allArticles = articles.concat(articles2, articles3, articles4);
+        // console.log(
+        //     "All article scores",
+        //     allArticles.map((article) => article.score)
+        // );
         const sources = allArticles.map((article) => ({
             title: article.title,
             link: article.link,
             favicon: article.favicon,
             cover: article.cover,
-            score: article.score,
         }));
 
-        streamable.update({ articleResults: sources });
+        const uniqueSources = [
+            ...new Map(
+                sources.map((item) => [JSON.stringify(item), item])
+            ).values(),
+        ];
+
+        streamable.update({ articleResults: uniqueSources });
+
         const vectorResults = articles
             .map((article) => ({
                 content: article.content,
             }))
             .join("/n");
         const queryIntent = await findQueryIntent(userMessage);
-        console.log("Query Intent", queryIntent);
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
                 content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
                         Tänkbara vinklar på frågan kan vara: ${queries.join(",")}.
-                        Intentionen med artikeln är att bevara: ${queryIntent}.
+                        Intentionen från din redaktör är att du ska skriva så att det här besvaras: ${queryIntent}.
                         Tänk på att Chef är en tidning inrikat på ledarskap och karriär.
                         Använd en objektiv och informativ ton.
                         Använd en tydlig struktur med rubrik, ingress, huvuddel och avslutning: 
@@ -232,7 +241,7 @@ async function myAction(userMessage: string): Promise<any> {
             stream: true,
             model: config.inferenceModel,
         });
-        console.log("Start reading chat completion");
+        // console.log("Start reading chat completion");
         for await (const chunk of chatCompletion) {
             if (
                 chunk.choices[0].delta &&
@@ -254,7 +263,7 @@ async function myAction(userMessage: string): Promise<any> {
         }
         streamable.done({ status: "done" });
     })();
-    console.log("Returning streamable value");
+    // console.log("Returning streamable value");
 
     return streamable.value;
 }

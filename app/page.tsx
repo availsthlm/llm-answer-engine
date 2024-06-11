@@ -220,7 +220,7 @@ export default function Page() {
                             key={`message-${index}`}
                             className="flex flex-col items-center"
                         >
-                            <div className="w-full md:w-2/4 md:pr-2">
+                            <div className="w-full md:w-3/4 md:pr-2">
                                 {/* {message.searchResults && (
                                     <SearchResultsComponent
                                         key={`searchResults-${index}`}

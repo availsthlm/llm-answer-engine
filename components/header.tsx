@@ -27,8 +27,8 @@ export function Header() {
                         <path d="m278.4 68.8549h-25.005v25.0439h25.005z"></path>
                     </g>
                 </svg>
-                <span className="block sm:inline text-md sm:text-md lg:text-md font-semibold  text-gray-600">
-                    - av Avail STHLM
+                <span className="block sm:inline text-md sm:text-md lg:text-md font-semibold  text-gray-700">
+                    GPT
                 </span>
             </a>
             {/* 
