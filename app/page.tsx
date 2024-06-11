@@ -24,6 +24,7 @@ import ArticleResultsComponent from "@/components/answer/ArticleResultsComponent
 import { useCookies } from "next-client-cookies";
 //import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
+import InputArea from "@/components/InputArea";
 
 // 2. Set up types
 interface SearchResult {
@@ -279,67 +280,82 @@ export default function Page() {
             <div className="pb-[80px] pt-4 md:pt-10">
                 <ChatScrollAnchor trackVisibility={true} />
             </div>
-            <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b duration-300 ease-in-out animate-in   peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]] mb-4">
-                <div className="mx-auto sm:max-w-2xl sm:px-4">
-                    <div className=" space-y-4 border-t shadow-lg  bg-gray-100 rounded-md sm:border">
-                        <form
-                            ref={formRef}
-                            onSubmit={async (e: FormEvent<HTMLFormElement>) => {
-                                e.preventDefault();
-                                handleFormSubmit(e);
-                                setCurrentLlmResponse("");
-                                if (window.innerWidth < 600) {
-                                    (e.target as HTMLFormElement)[
-                                        "message"
-                                    ]?.blur();
-                                }
-                                const value = inputValue.trim();
-                                setInputValue("");
-                                if (!value) return;
-                            }}
-                        >
-                            <div className="relative flex flex-col w-full overflow-hidden max-h-60 grow  bg-gray-100 sm:border sm:px-2">
-                                <Textarea
-                                    ref={inputRef}
-                                    tabIndex={0}
-                                    onKeyDown={onKeyDown}
-                                    placeholder="Send a message."
-                                    className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm  text-black"
-                                    autoFocus
-                                    spellCheck={false}
-                                    autoComplete="off"
-                                    autoCorrect="off"
-                                    name="message"
-                                    rows={1}
-                                    value={inputValue}
-                                    onChange={(e) =>
-                                        setInputValue(e.target.value)
-                                    }
-                                />
-                                <div className="absolute right-0 top-4 sm:right-4">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                type="submit"
-                                                size="icon"
-                                                disabled={inputValue === ""}
-                                            >
-                                                <IconArrowElbow />
-                                                <span className="sr-only">
-                                                    Send message
-                                                </span>
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Send message
-                                        </TooltipContent>
-                                    </Tooltip>
+            {messages.length === 0 ? (
+                <div className="mx-auto max-w-2xl px-4">
+                    <div className="flex flex-col gap-2 text-left bg-background p-8">
+                        <p className="leading-normal text-muted-foreground  text-md  text:lg-2xl">
+                            Chef GPT är laddad med 8490 artiklar från Chef.
+                        </p>
+                        <p className="leading-normal text-muted-foreground text-md text:lg-2xl">
+                            Ställ en fråga om ledarskap och få en ny artikel som
+                            svar.
+                        </p>
+                        <p className="leading-normal text-muted-foreground text-md text:lg-2xl">
+                            Helt och hållet genererad av AI.
+                        </p>
+                    </div>
+                    <InputArea
+                        {...{
+                            formRef,
+                            handleFormSubmit,
+                            setCurrentLlmResponse,
+                            inputValue,
+                            setInputValue,
+                            inputRef,
+                            onKeyDown,
+                        }}
+                    />
+                    <div className="mt-md">
+                        <div className="mt-8">
+                            <div className="grid grid-cols-1 gap-sm md:grid-cols-2 gap-4">
+                                <div style={{ opacity: 1, transform: "none" }}>
+                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
+                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
+                                            Vad ska jag tänka på inför
+                                            lönesamtalet?
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ opacity: 1, transform: "none" }}>
+                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
+                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
+                                            När är det dags att byta jobb?
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ opacity: 1, transform: "none" }}>
+                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
+                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
+                                            Hur motiverar jag mina medarbetare?
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style={{ opacity: 1, transform: "none" }}>
+                                    <div className="group  p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
+                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
+                                            Fack eller inte fack?
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            ) : (
+                <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b duration-300 ease-in-out animate-in   peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]] mb-4">
+                    <InputArea
+                        {...{
+                            formRef,
+                            handleFormSubmit,
+                            setCurrentLlmResponse,
+                            inputValue,
+                            setInputValue,
+                            inputRef,
+                            onKeyDown,
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 }
