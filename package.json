@@ -31,6 +31,7 @@
         "d3-scale": "^4.0.2",
         "date-fns": "^3.3.1",
         "geist": "^1.2.2",
+        "jspdf-html2canvas": "^1.5.2",
         "langchain": "^0.1.28",
         "next": "14.1.2",
         "next-client-cookies": "^1.1.1",

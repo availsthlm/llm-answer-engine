@@ -25,6 +25,7 @@ import { useCookies } from "next-client-cookies";
 //import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
 import InputArea from "@/components/InputArea";
+import Suggestions from "@/components/start/Suggestions";
 
 // 2. Set up types
 interface SearchResult {
@@ -79,6 +80,7 @@ export default function Page() {
     // 4. Set up form submission handling
     const { formRef, onKeyDown } = useEnterSubmit();
     const inputRef = useRef<HTMLTextAreaElement>(null);
+
     const [inputValue, setInputValue] = useState("");
     // 5. Set up state for the messages
     const [messages, setMessages] = useState<Message[]>([]);
@@ -114,6 +116,7 @@ export default function Page() {
             document.removeEventListener("keydown", handleKeyDown);
         };
     }, [inputRef]);
+
     // 9. Set up handler for when a submission is made, which will call the myAction function
     const handleSubmit = async (message: string) => {
         if (!message) return;
@@ -226,6 +229,7 @@ export default function Page() {
                                     imageUrl={message.cover}
                                     key={`llm-response-${index}`}
                                 />
+
                                 {message.followUp && (
                                     <div className="flex flex-col">
                                         <FollowUpComponent
@@ -275,48 +279,7 @@ export default function Page() {
                             onKeyDown,
                         }}
                     />
-                    <div className="mt-md">
-                        <div className="mt-8">
-                            <div className="grid grid-cols-1 gap-sm md:grid-cols-2 gap-4">
-                                <div
-                                    onClick={() =>
-                                        handleSubmit(
-                                            "Vad ska jag tänka på inför lönesamtalet?"
-                                        )
-                                    }
-                                    style={{ opacity: 1, transform: "none" }}
-                                >
-                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
-                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
-                                            Vad ska jag tänka på inför
-                                            lönesamtalet?
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style={{ opacity: 1, transform: "none" }}>
-                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
-                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
-                                            När är det dags att byta jobb?
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style={{ opacity: 1, transform: "none" }}>
-                                    <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
-                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
-                                            Hur motiverar jag mina medarbetare?
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style={{ opacity: 1, transform: "none" }}>
-                                    <div className="group  p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
-                                        <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
-                                            Fack eller inte fack?
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <Suggestions onPress={handleSubmit} />
                 </div>
             ) : (
                 <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b duration-300 ease-in-out animate-in   peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]] mb-4">

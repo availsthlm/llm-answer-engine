@@ -29,7 +29,7 @@ export default function InputArea({
 }: InputAreaProps) {
     return (
         <div className="mx-auto sm:max-w-2xl ">
-            <div className=" space-y-4 border-t shadow-lg  bg-gray-100 rounded-md sm:border">
+            <div className=" space-y-4  shadow-lg  bg-gray-100 rounded-md">
                 <form
                     ref={formRef}
                     onSubmit={async (e: FormEvent<HTMLFormElement>) => {
@@ -44,7 +44,7 @@ export default function InputArea({
                         if (!value) return;
                     }}
                 >
-                    <div className="relative flex flex-col w-full overflow-hidden max-h-60 grow  bg-gray-100 sm:border">
+                    <div className="relative flex flex-col w-full overflow-hidden max-h-60 grow  bg-gray-100 ">
                         <Textarea
                             ref={inputRef}
                             tabIndex={0}
