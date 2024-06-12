@@ -34,7 +34,7 @@ const ArticleResultsComponent = ({
     // 8. Define the 'visibleResults' variable to hold the search results to be displayed based on the 'isExpanded' state
     const visibleResults = isExpanded
         ? searchResults
-        : searchResults.slice(0, 3);
+        : searchResults.slice(0, 2);
 
     // 9. Define the 'handleFaviconLoad' function to update the 'loadedFavicons' state when a favicon is loaded
     const handleFaviconLoad = (index: number) => {
@@ -69,7 +69,7 @@ const ArticleResultsComponent = ({
                     Källor
                 </h2>
             </div>
-            <div className="grid grid-cols-2 gap-sm md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-sm md:grid-cols-3">
                 {searchResults.length === 0 ? (
                     // 12. Render the 'SearchResultsSkeleton' if there are no search results
                     <SearchResultsSkeleton />
@@ -87,17 +87,21 @@ const ArticleResultsComponent = ({
                                 <div className="flex group items-stretch w-full relative h-[74px]">
                                     <div className="rounded-md flex w-full  transition duration-300 bg-offset md:hover:bg-slate-200">
                                         <div className="relative z-10 flex items max-w-full flex-row justify-between h-full pointer-events-none select-none px-2 pt-2 pb-2">
-                                            {!loadedFavicons[index] && (
+                                            {/* {!loadedFavicons[index] && (
                                                 <div className="w-12 h-12  bg-gray-400 rounded animate-pulse"></div>
-                                            )}
+                                            )} */}
                                             <img
-                                                src={result.favicon}
+                                                src={
+                                                    result.favicon ||
+                                                    "/favicon-16x16.png"
+                                                }
                                                 alt="favicon"
-                                                className={`w-12 h-12 ${loadedFavicons[index] ? "block" : "hidden"}`}
+                                                className={`size-14  grayscale ${loadedFavicons[index] ? "block" : "hidden"}`}
                                                 onLoad={() =>
                                                     handleFaviconLoad(index)
                                                 }
                                             />
+
                                             <div className="line-clamp-2 grow  font-sans text-xs font-medium text-black selection:bg-slate-200 selection:text-gray pl-2">
                                                 {result.title}
                                             </div>
