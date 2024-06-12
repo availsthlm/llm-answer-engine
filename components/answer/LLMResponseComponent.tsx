@@ -45,6 +45,7 @@ const StreamingComponent = ({
                                         />
                                     );
                                 },
+                                strong: "b",
                             }}
                         >
                             {currentLlmResponse}
@@ -95,7 +96,7 @@ const LLMResponseComponent = ({
                                         />
                                     );
                                 },
-                                strong: "h4",
+                                strong: "b",
                             }}
                         >
                             {llmResponse}

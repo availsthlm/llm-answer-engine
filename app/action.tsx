@@ -207,15 +207,17 @@ async function myAction(userMessage: string): Promise<any> {
         streamable.update({ articleResults: uniqueSources });
 
         const vectorResults = articles
-            .map((article) => ({
-                content: article.content,
-            }))
-            .join("/n");
+            .map(
+                (article) =>
+                    `RUBRIK:${article.title},   INNEHÅLL:${article.content}`
+            )
+            .join(" ");
+
         const queryIntent = await findQueryIntent(userMessage);
         const messages: ChatCompletionMessageParam[] = [
             {
                 role: "system",
-                content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage},
+                content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage}.
                         Tänkbara vinklar på frågan kan vara: ${queries.join(",")}.
                         Intentionen från din redaktör är att du ska skriva så att det här besvaras: ${queryIntent}.
                         Tänk på att Chef är en tidning inrikat på ledarskap och karriär.
@@ -232,9 +234,11 @@ async function myAction(userMessage: string): Promise<any> {
             },
             {
                 role: "user",
-                content: `Använd endast information efter CONTEXT för att skriva artikeln. Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  CONTEXT: ${JSON.stringify(vectorResults)}. `,
+                content: `Använd endast information efter CONTEXT för att skriva artikeln. Informationen efter context är ett antal artiklar, varje artikel börjar med en RUBRIK följt av INNEHÅLL. Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  CONTEXT: ${JSON.stringify(vectorResults)}. `,
             },
         ];
+
+        console.log("Messages", JSON.stringify(messages));
 
         const chatCompletion = await openai.chat.completions.create({
             messages: messages,

@@ -84,6 +84,7 @@ export default function Page() {
     const [messages, setMessages] = useState<Message[]>([]);
     // 6. Set up state for the CURRENT LLM response (for displaying in the UI while streaming)
     const [currentLlmResponse, setCurrentLlmResponse] = useState("");
+    const [waitingForLLMResponse, setWaitingForLLMResponse] = useState(false);
     // 7. Set up handler for when the user clicks on the follow up button
     const handleFollowUpClick = useCallback(async (question: string) => {
         setCurrentLlmResponse("");
@@ -130,6 +131,7 @@ export default function Page() {
     const handleUserMessageSubmission = async (
         userMessage: string
     ): Promise<void> => {
+        setWaitingForLLMResponse(true);
         const newMessageId = Date.now();
         const newMessage = {
             id: newMessageId,
@@ -167,13 +169,7 @@ export default function Page() {
                         if (typedMessage.llmResponseEnd) {
                             currentMessage.isStreaming = false;
                         }
-                        if (
-                            typedMessage.searchResults &&
-                            typedMessage.searchResults.length > 0
-                        ) {
-                            currentMessage.searchResults =
-                                typedMessage.searchResults;
-                        }
+
                         if (typedMessage.articleResults) {
                             currentMessage.articleResults =
                                 typedMessage.articleResults;
@@ -183,18 +179,7 @@ export default function Page() {
                                     prev.score > current.score ? prev : current
                                 ).cover;
                         }
-                        if (
-                            typedMessage.images &&
-                            typedMessage.images.length > 0
-                        ) {
-                            currentMessage.images = [...typedMessage.images];
-                        }
-                        if (
-                            typedMessage.videos &&
-                            typedMessage.videos.length > 0
-                        ) {
-                            currentMessage.videos = [...typedMessage.videos];
-                        }
+
                         if (typedMessage.followUp) {
                             currentMessage.followUp = typedMessage.followUp;
                         }
@@ -222,12 +207,6 @@ export default function Page() {
                             className="flex flex-col items-center"
                         >
                             <div className="w-full md:w-3/4 md:pr-2">
-                                {/* {message.searchResults && (
-                                    <SearchResultsComponent
-                                        key={`searchResults-${index}`}
-                                        searchResults={message.searchResults}
-                                    />
-                                )} */}
                                 {message.type === "userMessage" && (
                                     <UserMessageComponent
                                         message={message.userMessage}
@@ -259,20 +238,6 @@ export default function Page() {
                                     </div>
                                 )}
                             </div>
-                            {/* <div className="w-full md:w-1/4 lg:pl-2">
-                                {message.videos && (
-                                    <VideosComponent
-                                        key={`videos-${index}`}
-                                        videos={message.videos}
-                                    />
-                                )}
-                                {message.images && (
-                                    <ImagesComponent
-                                        key={`images-${index}`}
-                                        images={message.images}
-                                    />
-                                )}
-                            </div> */}
                         </div>
                     ))}
                 </div>
@@ -280,9 +245,14 @@ export default function Page() {
             <div className="pb-[80px] pt-4 md:pt-10">
                 <ChatScrollAnchor trackVisibility={true} />
             </div>
+            {/* {messages.length === 1 && (
+                <div className="flex justify-center py-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                </div>
+            )} */}
             {messages.length === 0 ? (
-                <div className="mx-auto max-w-2xl px-4">
-                    <div className="flex flex-col gap-2 text-left bg-background p-8">
+                <div className="mx-auto  max-w-2xl px-4">
+                    <div className="flex border rounded-md flex-col gap-2 text-left bg-background p-8 mb-8">
                         <p className="leading-normal text-muted-foreground  text-md  text:lg-2xl">
                             Chef GPT är laddad med 8490 artiklar från Chef.
                         </p>
@@ -308,7 +278,14 @@ export default function Page() {
                     <div className="mt-md">
                         <div className="mt-8">
                             <div className="grid grid-cols-1 gap-sm md:grid-cols-2 gap-4">
-                                <div style={{ opacity: 1, transform: "none" }}>
+                                <div
+                                    onClick={() =>
+                                        handleSubmit(
+                                            "Vad ska jag tänka på inför lönesamtalet?"
+                                        )
+                                    }
+                                    style={{ opacity: 1, transform: "none" }}
+                                >
                                     <div className="group p-2 col-span-1 flex cursor-pointer items-center gap-x-sm rounded-lg border p-xs border-borderMain/50 ring-borderMain/50 divide-borderMain/50 dark:divide-borderMainDark/50  dark:ring-borderMainDark/50 dark:border-borderMainDark/50 transition duration-300 bg-transparent md:hover:bg-offset md:dark:hover:bg-offsetDark">
                                         <div className="default font-sans text-sm font-medium text-textMain dark:text-textMainDark selection:bg-super/50 selection:text-textMain dark:selection:bg-superDuper/10 dark:selection:text-superDark">
                                             Vad ska jag tänka på inför
