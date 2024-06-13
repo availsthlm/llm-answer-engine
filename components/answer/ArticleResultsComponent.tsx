@@ -96,7 +96,7 @@ const ArticleResultsComponent = ({
                                                     "/favicon-16x16.png"
                                                 }
                                                 alt="favicon"
-                                                className={`size-14  grayscale ${loadedFavicons[index] ? "block" : "hidden"}`}
+                                                className={`size-14 ${result.favicon ? "" : "grayscale"}  ${loadedFavicons[index] ? "block" : "hidden"}`}
                                                 onLoad={() =>
                                                     handleFaviconLoad(index)
                                                 }

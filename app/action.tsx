@@ -73,7 +73,7 @@ async function getSourcesFromPinecone(question: string) {
     // Query the index using the query embedding
     const results = await index.query({
         vector: query,
-        topK: 6,
+        topK: 4,
         includeMetadata: true,
         includeValues: true,
     });
@@ -187,16 +187,15 @@ async function myAction(userMessage: string): Promise<any> {
         ]);
 
         const allArticles = articles.concat(articles2, articles3, articles4);
-        // console.log(
-        //     "All article scores",
-        //     allArticles.map((article) => article.score)
-        // );
-        const sources = allArticles.map((article) => ({
-            title: article.title,
-            link: article.link,
-            favicon: article.favicon,
-            cover: article.cover,
-        }));
+
+        const sources = allArticles
+            .filter((article) => article.score && article.score > 0.6)
+            .map((article) => ({
+                title: article.title,
+                link: article.link,
+                favicon: article.favicon,
+                cover: article.cover,
+            }));
 
         const uniqueSources = [
             ...new Map(
@@ -237,8 +236,6 @@ async function myAction(userMessage: string): Promise<any> {
                 content: `Använd endast information efter CONTEXT för att skriva artikeln. Informationen efter context är ett antal artiklar, varje artikel börjar med en RUBRIK följt av INNEHÅLL. Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  CONTEXT: ${JSON.stringify(vectorResults)}. `,
             },
         ];
-
-        console.log("Messages", JSON.stringify(messages));
 
         const chatCompletion = await openai.chat.completions.create({
             messages: messages,
