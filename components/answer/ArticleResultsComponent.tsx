@@ -69,7 +69,7 @@ const ArticleResultsComponent = ({
                     Källor
                 </h2>
             </div>
-            <div className="grid grid-cols-2 gap-sm md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-sm md:grid-cols-3  lg:grid-cols-4">
                 {searchResults.length === 0 ? (
                     // 12. Render the 'SearchResultsSkeleton' if there are no search results
                     <SearchResultsSkeleton />
