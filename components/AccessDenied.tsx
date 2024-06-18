@@ -12,7 +12,7 @@ function AccessDenied() {
         event.preventDefault();
         // const password = new FormData(event.currentTarget).get("password");
 
-        if (password === "avail") {
+        if (password === "3yixtL699i+.") {
             // Set a session cookie
             window.document.cookie = `auth=true; Path=/; SameSite=Strict; Secure`;
             window.location.href = "/";
@@ -22,15 +22,15 @@ function AccessDenied() {
     };
 
     return (
-        <div className="flex flex-col items-center mt-5 p-5 bg-slate-100">
+        <div className="flex flex-col items-center mt-5 p-5 bg-red-50">
             <form onSubmit={handleSubmit}>
-                <label>Password:</label>
+                <label>Lösenord:</label>
                 <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                <button type="submit">Enter</button>
+                <input className="ml-2 bg-midnight text-tahiti" type="submit" />
             </form>
         </div>
     );
