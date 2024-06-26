@@ -3,10 +3,6 @@ import "server-only";
 import { createAI, createStreamableValue } from "ai/rsc";
 import { OpenAI } from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
-import cheerio from "cheerio";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { Document as DocumentInterface } from "langchain/document";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
 // 1.5 Configuration file for inference model, embeddings model, and other parameters
@@ -44,23 +40,6 @@ if (config.useOllamaEmbeddings) {
     embeddings = new OpenAIEmbeddings({
         modelName: config.embeddingsModel,
     });
-}
-// 3. Define interfaces for search results and content results
-interface SearchResult {
-    title: string;
-    link: string;
-    snippet: string;
-    favicon: string;
-}
-
-interface ArticleResult {
-    title: string;
-    link: string;
-    content: string;
-    image: string;
-}
-interface ContentResult extends SearchResult {
-    html: string;
 }
 
 async function getSourcesFromPinecone(question: string) {
