@@ -73,7 +73,7 @@ export default function Page() {
   // 5. Set up state for the messages
   const [messages, setMessages] = useState<Message[]>([]);
   // 6. Set up state for the CURRENT LLM response (for displaying in the UI while streaming)
-  const [, setCurrentLlmResponse] = useState("");
+  const [currentLlmResponse, setCurrentLlmResponse] = useState("");
   const [, setWaitingForLLMResponse] = useState(false);
   // 7. Set up handler for when the user clicks on the follow up button
   const handleFollowUpClick = useCallback(async (question: string) => {
