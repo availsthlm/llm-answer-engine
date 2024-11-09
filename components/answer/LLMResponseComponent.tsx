@@ -4,19 +4,25 @@ interface LLMResponseComponentProps {
   currentLlmResponse: string;
   imageUrl: string;
   index: number;
+  articles?: Article[];
+}
+
+interface Article {
+  title: string;
+  favicon: string;
 }
 
 import { useRef } from "react";
 // 2. Import the 'Markdown' component from 'react-markdown'
-import { generatePDF } from "@/lib/utils/generatePDF";
 import Markdown from "react-markdown";
-
+import ArticleHeroComponent from "./ArticleHeroComponent";
 // 3. Define the 'StreamingComponent' functional component that renders the 'currentLlmResponse'
 const StreamingComponent = ({
   currentLlmResponse,
 }: {
   currentLlmResponse: string;
 }) => {
+  console.log("StreamingComponent");
   return (
     <>
       {currentLlmResponse && (
@@ -57,27 +63,23 @@ const StreamingComponent = ({
 const LLMResponseComponent = ({
   llmResponse,
   currentLlmResponse,
-  imageUrl,
+  articles,
 }: LLMResponseComponentProps) => {
   const articleRef = useRef<HTMLDivElement>(null);
   // 5. Check if 'llmResponse' is not empty
   const hasLlmResponse = llmResponse && llmResponse.trim().length > 0;
-
+  console.log("LLMResponseComponent", articles);
   return (
     <>
       {hasLlmResponse ? (
         // 6. If 'llmResponse' is not empty, render a div with the 'Markdown' component
         <div className=" bg-white shadow-lg rounded-lg  mt-4">
-          {imageUrl && (
-            <div className="flex items-center p-4">
-              <img src={imageUrl} alt="Chef GPT" className="w-full block" />
-            </div>
-          )}
           <div
             id="hasLlmResponse"
             ref={articleRef}
             className=" text-gray-800 p-4"
           >
+            {articles && <ArticleHeroComponent articles={articles} />}
             <Markdown
               components={{
                 h1: "h3",

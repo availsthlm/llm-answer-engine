@@ -210,6 +210,7 @@ export default function Page() {
                   currentLlmResponse={currentLlmResponse}
                   index={index}
                   imageUrl={message.cover}
+                  articles={message.articleResults}
                   key={`llm-response-${index}`}
                 />
 

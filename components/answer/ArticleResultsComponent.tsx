@@ -65,7 +65,7 @@ const ArticleResultsComponent = ({
       <div className="flex items-center mb-4">
         <h2 className="text-lg font-semibold flex-grow text-black">Källor</h2>
       </div>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2">
         {searchResults.length === 0 ? (
           <SearchResultsSkeleton />
         ) : (
