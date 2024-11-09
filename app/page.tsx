@@ -237,23 +237,7 @@ export default function Page() {
             )} */}
       {messages.length === 0 ? (
         <div className="mx-auto  max-w-2xl px-4">
-          <div className="flex border rounded-md flex-col gap-2 text-left bg-background p-8 mb-8">
-            <p className="leading-normal text-muted-foreground  text-md  text:lg-2xl">
-              Välkommen till Chef GPT - en AI-tjänst som är laddad med 8 490
-              artiklar från Chef. Ställ en fråga om ledarskap och få en
-              skräddarsydd artikel som svar.
-            </p>
-
-            <p className=" text-muted-foreground text-xs text:lg-2xl">
-              Chef GPT utvecklas i takt med hur den används. Alla AI-tjänster
-              har begränsningar. Förlita dig inte enbart på svaren du får i Chef
-              GPT, särskilt inte i komplexa eller känsliga situationer.
-            </p>
-            <p className=" text-muted-foreground text-xs text:lg-2xl">
-              Använd alltid ditt eget omdöme och komplettera AI:s insikter med
-              mänsklig intelligens när det behövs.
-            </p>
-          </div>
+          <Suggestions onPress={handleSubmit} />
           <InputArea
             {...{
               formRef,
@@ -265,7 +249,6 @@ export default function Page() {
               onKeyDown,
             }}
           />
-          <Suggestions onPress={handleSubmit} />
         </div>
       ) : (
         <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b duration-300 ease-in-out animate-in   peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]] mb-4">
