@@ -85,12 +85,14 @@ const ArticleResultsComponent = ({
                   } ${loadedFavicons[index] ? "block" : "hidden"}`}
                   onLoad={() => handleFaviconLoad(index)}
                 />
-                <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                  {result.title}
-                </p>
-                <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                  Publicerad: {result.date}
-                </p>
+                <div className="p-2">
+                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                    {result.title}
+                  </p>
+                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                    Publicerad: {result.date}
+                  </p>
+                </div>
               </div>
             </div>
           </a>
@@ -99,7 +101,7 @@ const ArticleResultsComponent = ({
         {searchResults.length > 3 && (
           <div
             onClick={toggleExpansion}
-            className="text-center p-2 cursor-pointer hover:bg-gray-50 rounded-lg"
+            className="p-2 cursor-pointer hover:bg-gray-50 rounded-lg"
           >
             <span className="text-sm font-medium text-gray-700">
               {isExpanded ? "Visa färre" : "Visa fler"}

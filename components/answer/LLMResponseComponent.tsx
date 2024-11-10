@@ -36,7 +36,18 @@ const LLMResponseComponent = ({
           {articles && llmResponse.length > 0 && (
             <ArticleResultsComponent searchResults={articles} />
           )}
-          {summary && <div className="text-gray-500 text-sm">{summary}</div>}
+          {summary && (
+            <div className="text-gray-500 text-sm mb-4 p-3 bg-gray-50 rounded-md border border-gray-200 mt-4">
+              <h3 className="text-lg font-semibold mb-2">Artikeln i korthet</h3>
+              <ul className="list-disc pl-4 space-y-1">
+                {JSON.parse(summary).keyPoints.map(
+                  (point: string, index: number) => (
+                    <li key={index}>{point}</li>
+                  )
+                )}
+              </ul>
+            </div>
+          )}
           <Markdown
             components={{
               h1: "h3",

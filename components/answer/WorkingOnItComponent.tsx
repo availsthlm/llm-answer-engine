@@ -11,16 +11,30 @@ const WorkingOnItComponent = ({
     <div className="flex flex-col items-center py-4 w-full px-4">
       {status === "answering" ? (
         <>
+          <div className="text-gray-600 transition-opacity duration-500 opacity-100 animate-fade-in">
+            Sammanställer din artikel
+            <span className="inline-flex w-[3ch] justify-start overflow-hidden">
+              <span className="animate-[ellipsis_1.5s_steps(4,end)_infinite]">
+                ...
+              </span>
+            </span>
+          </div>
           <div className="w-full h-2 bg-gray-200 rounded-full mb-2">
             <div
               className="h-full bg-gray-500 rounded-full transition-all duration-300"
               style={{ width: `${Math.min((tokens / 500) * 100, 100)}%` }}
             />
           </div>
-          <div className="text-gray-500">Sammanställer din artikel...</div>
         </>
       ) : (
-        <div className="text-gray-500">Söker i arkivet...</div>
+        <div className="text-gray-600 transition-opacity duration-500 opacity-100 animate-fade-in ">
+          Söker i arkivet
+          <span className="inline-flex w-[3ch] justify-start overflow-hidden">
+            <span className="animate-[ellipsis_1.5s_steps(4,end)_infinite]">
+              ...
+            </span>
+          </span>
+        </div>
       )}
     </div>
   );
