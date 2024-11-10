@@ -1,16 +1,18 @@
 "use client";
-import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
-import { readStreamableValue, useActions } from "ai/rsc";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { type AI } from "./action";
-// Custom components
-import ArticleResultsComponent from "@/components/answer/ArticleResultsComponent";
 import FollowUpComponent from "@/components/answer/FollowUpComponent";
 import LLMResponseComponent from "@/components/answer/LLMResponseComponent";
 import UserMessageComponent from "@/components/answer/UserMessageComponent";
+import { useEnterSubmit } from "@/lib/hooks/use-enter-submit";
+import { readStreamableValue, useActions } from "ai/rsc";
 import { useCookies } from "next-client-cookies";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { type AI } from "./action";
+// Custom components
+
 //import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
+import { SearchResult } from "@/components/answer/ArticleResultsComponent";
+import WorkingOnItComponent from "@/components/answer/WorkingOnItComponent";
 import InputArea from "@/components/InputArea";
 import Suggestions from "@/components/start/Suggestions";
 
@@ -19,6 +21,7 @@ interface Message {
   type: string;
   content: string;
   userMessage: string;
+  summary?: string | null;
   images: Image[];
   videos: Video[];
   cover: string;
@@ -35,6 +38,7 @@ export interface StreamMessage {
   userMessage?: string;
   llmResponse?: string | null;
   llmResponseEnd?: boolean;
+  summary?: string | null;
   images?: any;
   cover?: any;
   videos?: any;
@@ -175,6 +179,10 @@ export default function Page() {
             if (typedMessage.followUp) {
               currentMessage.followUp = typedMessage.followUp;
             }
+
+            if (typedMessage.summary) {
+              currentMessage.summary = typedMessage.summary;
+            }
           }
 
           return messagesCopy;
@@ -189,11 +197,7 @@ export default function Page() {
     }
   };
   if (!cookies.get("auth")) return <AccessDenied />;
-  messages.map((x) => {
-    if (x.status) {
-      console.log("Message status", x.status);
-    }
-  });
+
   return (
     <div>
       {messages.length > 0 && (
@@ -208,21 +212,22 @@ export default function Page() {
                   <UserMessageComponent message={message.userMessage} />
                 )}
 
-                <ArticleResultsComponent
-                  key={`articleResults-${index}`}
-                  searching={message.status === "searching"}
-                  searchResults={message.articleResults}
+                <WorkingOnItComponent
+                  status={message.status}
+                  tokens={message.content.split(" ").length}
                 />
 
-                <LLMResponseComponent
-                  writing={message.status === "answering"}
-                  llmResponse={message.content}
-                  currentLlmResponse={currentLlmResponse}
-                  index={index}
-                  imageUrl={message.cover}
-                  articles={message.articleResults}
-                  key={`llm-response-${index}`}
-                />
+                {message.status === "done" && (
+                  <LLMResponseComponent
+                    llmResponse={message.content}
+                    currentLlmResponse={currentLlmResponse}
+                    summary={message.summary || ""}
+                    index={index}
+                    imageUrl={message.cover}
+                    articles={message.articleResults}
+                    key={`llm-response-${index}`}
+                  />
+                )}
 
                 {message.followUp && (
                   <div className="flex flex-col">

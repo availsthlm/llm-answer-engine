@@ -78,8 +78,18 @@ const relevantQuestions = async (
       {
         role: "system",
         content: `
-          Du är en frågegenerator som genererar en array med 3 uppföljningsfrågor i JSON-format.
-          The JSON schema should include:
+        Generate 3 follow-up questions based on the content of the provided article.
+
+        Consider the key themes, arguments, and details presented in the article to formulate a thoughtful and relevant question. Ensure that the question encourages further exploration of the topic and prompts discussion.
+
+        # Steps
+
+        1. Read and understand the main arguments and key points of the article.
+        2. Identify any areas that could benefit from additional inquiry or clarification.
+        3. Formulate a question that aligns with the main themes and is open-ended to promote discussion.
+        
+        # Output Format
+        The JSON schema should include:
           {
             "original": ${originalQuestion},
             "followUp": [
@@ -88,6 +98,9 @@ const relevantQuestions = async (
               "Fråga 3"
             ]
           }
+
+          " Notes
+          - Answer in Swedish
           `,
       },
       {
@@ -171,7 +184,7 @@ async function myAction(userMessage: string): Promise<any> {
     const allArticles = [
       ...new Set(
         [...articles, ...articles2, ...articles3, ...articles4]
-          .filter((article) => article.score && article.score > 0.7)
+          .filter((article) => article.score && article.score > 0.6)
           .map((article) => JSON.stringify(article))
       ),
     ].map((str) => JSON.parse(str));
@@ -227,7 +240,12 @@ async function myAction(userMessage: string): Promise<any> {
       },
       {
         role: "user",
-        content: `Använd endast information efter CONTEXT för att skriva artikeln. Informationen efter context är ett antal artiklar, varje artikel börjar med en RUBRIK följt av INNEHÅLL. Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  CONTEXT: ${JSON.stringify(vectorResults)}. `,
+        content: `Använd endast information efter CONTEXT för att skriva artikeln. 
+        Om du inte hittar något relevant innehåll efter CONTEXT, så be användaren om att skriva om frågan.
+        Informationen efter context är ett antal artiklar, varje artikel börjar med en RUBRIK följt av INNEHÅLL.
+        Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  
+        En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  
+        CONTEXT: ${JSON.stringify(vectorResults)}. `,
       },
     ];
 
@@ -237,16 +255,81 @@ async function myAction(userMessage: string): Promise<any> {
       model: config.inferenceModel,
     });
     // console.log("Start reading chat completion");
+    let completeResponse = "";
     for await (const chunk of chatCompletion) {
       if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
+        completeResponse += chunk.choices[0].delta.content || ""; // Accumulate the complete response
+
         streamable.update({
           llmResponse: chunk.choices[0].delta.content,
         });
       } else if (chunk.choices[0].finish_reason === "stop") {
         streamable.update({ llmResponseEnd: true });
+
+        // Add summary generation after the main response
+        const summaryMessages: ChatCompletionMessageParam[] = [
+          {
+            role: "system",
+            content: `
+              Summarize the provided article into three key points.
+
+- Focus on the main ideas, arguments, and conclusions expressed in the article.
+- Ensure that each key point is concise and captures the essence of the article without extraneous details.
+
+# Steps
+
+1. Read the entire article carefully.
+2. Identify the main themes and messages conveyed by the author.
+3. Condense these themes into three succinct key points.
+
+# Output Format
+
+Output should be in plain text, consisting of exactly three bullet points, each not exceeding two sentences.
+
+# Examples
+
+**Input:**  
+An article discussing the impact of climate change on global agriculture. 
+
+**Output JSON:**  
+{
+  "keyPoints": [
+    " Climate change is leading to unpredictable weather patterns, affecting crop yields worldwide.",
+    "Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.",
+    " Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture."
+  ]
+}
+
+- Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.  
+- Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture. 
+
+(*Real examples should reflect the actual content and nuances of the article, thereby being more specific and tailored to the original text.*) 
+
+# Notes
+
+Focus on clarity and relevance in the key points, ensuring they reflect the fundamental aspects of the article.
+Always verify factual accuracy and context while summarizing.
+              `,
+          },
+          {
+            role: "user",
+            content: `Sammanfatta följande artikel: ${completeResponse}`,
+          },
+        ];
+
+        const summaryCompletion = await openai.chat.completions.create({
+          messages: summaryMessages,
+          model: config.inferenceModel,
+          stream: false,
+          response_format: { type: "json_object" },
+        });
+        console.log("Summary", summaryCompletion.choices[0].message.content);
+        streamable.update({
+          summary: summaryCompletion.choices[0].message.content,
+        });
       }
     }
-    if (!config.useOllamaInference) {
+    if (allArticles.length > 0) {
       const followUp = await relevantQuestions(
         userMessage,
         articles.map((article) => article.content)
