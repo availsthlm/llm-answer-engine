@@ -71,7 +71,7 @@ async function getSourcesFromPinecone(question: string) {
 
 const relevantQuestions = async (
   originalQuestion: string,
-  sources: string[]
+  article: string
 ): Promise<any> => {
   return await openai.chat.completions.create({
     messages: [
@@ -105,7 +105,7 @@ const relevantQuestions = async (
       },
       {
         role: "user",
-        content: `Generera uppföljningsfrågor baserat på de bästa resultaten från: ${JSON.stringify(sources)}. Den ursprungliga sökfrågan är: ${originalQuestion}.`,
+        content: `Artikel: \n ${article} \n. Den ursprungliga sökfrågan är: ${originalQuestion}.`,
       },
     ],
     model: config.inferenceModel,
@@ -164,6 +164,67 @@ const findQueryIntent = async (text: string) => {
   });
 
   return response.choices[0].message.content;
+};
+
+const generateSummary = async (completeResponse: string) => {
+  // Add summary generation after the main response
+  const summaryMessages: ChatCompletionMessageParam[] = [
+    {
+      role: "system",
+      content: `
+              Summarize the provided article into three key points.
+
+- Focus on the main ideas, arguments, and conclusions expressed in the article.
+- Ensure that each key point is concise and captures the essence of the article without extraneous details.
+
+# Steps
+
+1. Read the entire article carefully.
+2. Identify the main themes and messages conveyed by the author.
+3. Condense these themes into three succinct key points.
+
+# Output Format
+
+Output should be in plain text, consisting of exactly three bullet points, each not exceeding two sentences.
+
+# Examples
+
+**Input:**  
+An article discussing the impact of climate change on global agriculture. 
+
+**Output JSON:**  
+{
+  "keyPoints": [
+    " Climate change is leading to unpredictable weather patterns, affecting crop yields worldwide.",
+    "Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.",
+    " Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture."
+  ]
+}
+
+- Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.  
+- Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture. 
+
+(*Real examples should reflect the actual content and nuances of the article, thereby being more specific and tailored to the original text.*) 
+
+# Notes
+
+Focus on clarity and relevance in the key points, ensuring they reflect the fundamental aspects of the article.
+Always verify factual accuracy and context while summarizing.
+              `,
+    },
+    {
+      role: "user",
+      content: `Sammanfatta följande artikel: ${completeResponse}`,
+    },
+  ];
+
+  const summaryCompletion = await openai.chat.completions.create({
+    messages: summaryMessages,
+    model: config.inferenceModel,
+    stream: false,
+    response_format: { type: "json_object" },
+  });
+  return summaryCompletion.choices[0].message.content;
 };
 // 10. Main action function that orchestrates the entire process
 async function myAction(userMessage: string): Promise<any> {
@@ -266,76 +327,16 @@ async function myAction(userMessage: string): Promise<any> {
       } else if (chunk.choices[0].finish_reason === "stop") {
         streamable.update({ llmResponseEnd: true });
 
-        // Add summary generation after the main response
-        const summaryMessages: ChatCompletionMessageParam[] = [
-          {
-            role: "system",
-            content: `
-              Summarize the provided article into three key points.
-
-- Focus on the main ideas, arguments, and conclusions expressed in the article.
-- Ensure that each key point is concise and captures the essence of the article without extraneous details.
-
-# Steps
-
-1. Read the entire article carefully.
-2. Identify the main themes and messages conveyed by the author.
-3. Condense these themes into three succinct key points.
-
-# Output Format
-
-Output should be in plain text, consisting of exactly three bullet points, each not exceeding two sentences.
-
-# Examples
-
-**Input:**  
-An article discussing the impact of climate change on global agriculture. 
-
-**Output JSON:**  
-{
-  "keyPoints": [
-    " Climate change is leading to unpredictable weather patterns, affecting crop yields worldwide.",
-    "Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.",
-    " Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture."
-  ]
-}
-
-- Increased temperatures and drought conditions are causing food insecurity in vulnerable regions.  
-- Sustainable farming practices are essential to adapt and mitigate the effects of climate change on agriculture. 
-
-(*Real examples should reflect the actual content and nuances of the article, thereby being more specific and tailored to the original text.*) 
-
-# Notes
-
-Focus on clarity and relevance in the key points, ensuring they reflect the fundamental aspects of the article.
-Always verify factual accuracy and context while summarizing.
-              `,
-          },
-          {
-            role: "user",
-            content: `Sammanfatta följande artikel: ${completeResponse}`,
-          },
-        ];
-
-        const summaryCompletion = await openai.chat.completions.create({
-          messages: summaryMessages,
-          model: config.inferenceModel,
-          stream: false,
-          response_format: { type: "json_object" },
-        });
-        console.log("Summary", summaryCompletion.choices[0].message.content);
+        const summary = await generateSummary(completeResponse);
         streamable.update({
-          summary: summaryCompletion.choices[0].message.content,
+          summary: summary,
         });
+
+        const followUp = await relevantQuestions(userMessage, completeResponse);
+        streamable.update({ followUp: followUp });
       }
     }
-    if (allArticles.length > 0) {
-      const followUp = await relevantQuestions(
-        userMessage,
-        articles.map((article) => article.content)
-      );
-      streamable.update({ followUp: followUp });
-    }
+
     streamable.done({ status: "done" });
   })();
   // console.log("Returning streamable value");
