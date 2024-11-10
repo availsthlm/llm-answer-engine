@@ -26,7 +26,9 @@ const ArticleHeroComponent = memo(({ articles }: { articles: Article[] }) => {
   // 7. Define the 'toggleExpansion' function to toggle the 'isExpanded' state
 
   // 8. Define the 'visibleResults' variable to hold the search results to be displayed based on the 'isExpanded' state
-  const visibleResults = isExpanded ? articles : articles.slice(0, 4);
+  const visibleResults = articles
+    .filter((article) => article.favicon && article.favicon.trim() !== "")
+    .slice(0, isExpanded ? undefined : 4);
 
   // 9. Define the 'handleFaviconLoad' function to update the 'loadedFavicons' state when a favicon is loaded
   const handleFaviconLoad = (index: number) => {

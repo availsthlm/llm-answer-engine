@@ -161,11 +161,15 @@ export default function Page() {
 
             if (typedMessage.articleResults) {
               currentMessage.articleResults = typedMessage.articleResults;
-              currentMessage.cover = typedMessage.articleResults
-                .filter((article: any) => article.cover !== "")
-                .reduce((prev: any, current: any) =>
-                  prev.score > current.score ? prev : current
-                ).cover;
+              const articlesWithCover = typedMessage.articleResults.filter(
+                (article: any) => article.cover !== ""
+              );
+              currentMessage.cover =
+                articlesWithCover.length > 0
+                  ? articlesWithCover.reduce((prev: any, current: any) =>
+                      prev.score > current.score ? prev : current
+                    ).cover
+                  : "";
             }
 
             if (typedMessage.followUp) {
@@ -198,12 +202,6 @@ export default function Page() {
                 {message.type === "userMessage" && (
                   <UserMessageComponent message={message.userMessage} />
                 )}
-                {message.articleResults && (
-                  <ArticleResultsComponent
-                    key={`articleResults-${index}`}
-                    searchResults={message.articleResults}
-                  />
-                )}
 
                 <LLMResponseComponent
                   llmResponse={message.content}
@@ -213,7 +211,12 @@ export default function Page() {
                   articles={message.articleResults}
                   key={`llm-response-${index}`}
                 />
-
+                {message.articleResults && (
+                  <ArticleResultsComponent
+                    key={`articleResults-${index}`}
+                    searchResults={message.articleResults}
+                  />
+                )}
                 {message.followUp && (
                   <div className="flex flex-col">
                     <FollowUpComponent

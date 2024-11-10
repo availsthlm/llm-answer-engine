@@ -45,18 +45,19 @@ const ArticleResultsComponent = ({
 
   // 10. Define the 'SearchResultsSkeleton' component to render a loading skeleton
   const SearchResultsSkeleton = () => (
-    <>
+    <div className="space-y-2">
       {Array.from({ length: isExpanded ? searchResults.length : 3 }).map(
         (_, index) => (
-          <div key={index} className="p-2 w-full sm:w-1/2 md:w-1/4">
-            <div className="flex items-center space-x-2  bg-gray-100 p-3 rounded-lg h-full">
-              <div className="w-5 h-5  bg-gray-400 rounded animate-pulse"></div>
-              <div className="w-full h-4  bg-gray-400 rounded animate-pulse"></div>
-            </div>
+          <div
+            key={index}
+            className="flex items-center space-x-2 bg-gray-100 p-3 rounded-lg"
+          >
+            <div className="w-5 h-5 bg-gray-400 rounded animate-pulse"></div>
+            <div className="w-full h-4 bg-gray-400 rounded animate-pulse"></div>
           </div>
         )
       )}
-    </>
+    </div>
   );
 
   // 11. Render the 'SearchResultsComponent'
@@ -65,47 +66,49 @@ const ArticleResultsComponent = ({
       <div className="flex items-center mb-4">
         <h2 className="text-lg font-semibold flex-grow text-black">Källor</h2>
       </div>
-      <div className="grid grid-cols-2">
+
+      <div className="space-y-2">
         {searchResults.length === 0 ? (
           <SearchResultsSkeleton />
         ) : (
-          visibleResults.map((result, index) => (
-            <a
-              key={index}
-              href={result.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <div className="grid grid-cols-2  md:grid-cols-2">
-                <div className="aspect-[4/3] relative bg-gray-100">
-                  <img
-                    src={result.favicon || "/favicon-16x16.png"}
-                    alt="favicon"
-                    className={`w-full h-full object-cover ${
-                      result.favicon ? "" : "grayscale"
-                    } ${loadedFavicons[index] ? "block" : "hidden"}`}
-                    onLoad={() => handleFaviconLoad(index)}
-                  />
-                </div>
-                <div className="p-3">
-                  <p className="text-sm font-medium text-gray-900 line-clamp-2">
+          <>
+            {visibleResults.map((result, index) => (
+              <a
+                key={index}
+                href={result.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block hover:bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center space-x-1 p-1">
+                  <div className="w-5 h-5 flex-shrink-0">
+                    <img
+                      src={result.favicon || "/favicon-16x16.png"}
+                      alt="favicon"
+                      className={`w-full h-full object-contain ${
+                        result.favicon ? "" : "grayscale"
+                      } ${loadedFavicons[index] ? "block" : "hidden"}`}
+                      onLoad={() => handleFaviconLoad(index)}
+                    />
+                  </div>
+                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
                     {result.title}
                   </p>
                 </div>
+              </a>
+            ))}
+
+            {searchResults.length > 3 && (
+              <div
+                onClick={toggleExpansion}
+                className="text-center p-2 cursor-pointer hover:bg-gray-50 rounded-lg"
+              >
+                <span className="text-sm font-medium text-gray-700">
+                  {isExpanded ? "Visa färre" : "Visa fler"}
+                </span>
               </div>
-            </a>
-          ))
-        )}
-        {searchResults.length > 3 && (
-          <div
-            onClick={toggleExpansion}
-            className="rounded-xl border border-gray-200 flex items-center justify-center cursor-pointer aspect-[4/3]"
-          >
-            <span className="text-sm font-medium text-gray-700">
-              {isExpanded ? "Visa färre" : "Visa fler"}
-            </span>
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
