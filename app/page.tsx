@@ -13,14 +13,7 @@ import { useCookies } from "next-client-cookies";
 import AccessDenied from "@/components/AccessDenied";
 import InputArea from "@/components/InputArea";
 import Suggestions from "@/components/start/Suggestions";
-import { ChatScrollAnchor } from "@/lib/hooks/chat-scroll-anchor";
 
-// 2. Set up types
-interface SearchResult {
-  favicon: string;
-  link: string;
-  title: string;
-}
 interface Message {
   id: number;
   type: string;
@@ -33,17 +26,20 @@ interface Message {
   isStreaming: boolean;
   searchResults?: SearchResult[];
   articleResults?: SearchResult[];
+
+  status?: "done" | "searching" | "answering";
 }
-interface StreamMessage {
+export interface StreamMessage {
   articleResults?: any;
   searchResults?: any;
   userMessage?: string;
-  llmResponse?: string;
+  llmResponse?: string | null;
   llmResponseEnd?: boolean;
   images?: any;
   cover?: any;
   videos?: any;
   followUp?: any;
+  status?: "done" | "searching" | "answering";
 }
 interface Image {
   link: string;
@@ -172,10 +168,15 @@ export default function Page() {
                   : "";
             }
 
+            if (typedMessage.status) {
+              currentMessage.status = typedMessage.status;
+            }
+
             if (typedMessage.followUp) {
               currentMessage.followUp = typedMessage.followUp;
             }
           }
+
           return messagesCopy;
         });
         if (typedMessage.llmResponse) {
@@ -188,7 +189,11 @@ export default function Page() {
     }
   };
   if (!cookies.get("auth")) return <AccessDenied />;
-
+  messages.map((x) => {
+    if (x.status) {
+      console.log("Message status", x.status);
+    }
+  });
   return (
     <div>
       {messages.length > 0 && (
@@ -203,7 +208,14 @@ export default function Page() {
                   <UserMessageComponent message={message.userMessage} />
                 )}
 
+                <ArticleResultsComponent
+                  key={`articleResults-${index}`}
+                  searching={message.status === "searching"}
+                  searchResults={message.articleResults}
+                />
+
                 <LLMResponseComponent
+                  writing={message.status === "answering"}
                   llmResponse={message.content}
                   currentLlmResponse={currentLlmResponse}
                   index={index}
@@ -211,12 +223,7 @@ export default function Page() {
                   articles={message.articleResults}
                   key={`llm-response-${index}`}
                 />
-                {message.articleResults && (
-                  <ArticleResultsComponent
-                    key={`articleResults-${index}`}
-                    searchResults={message.articleResults}
-                  />
-                )}
+
                 {message.followUp && (
                   <div className="flex flex-col">
                     <FollowUpComponent
@@ -231,10 +238,10 @@ export default function Page() {
           ))}
         </div>
       )}
-      <div className="pb-[80px] pt-4 md:pt-10">
+      {/*<div className="pb-[80px] pt-4 md:pt-10">
         <ChatScrollAnchor trackVisibility={true} />
       </div>
-      {/* {messages.length === 1 && (
+       {messages.length === 1 && (
                 <div className="flex justify-center py-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
                 </div>

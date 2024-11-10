@@ -5,6 +5,7 @@ interface LLMResponseComponentProps {
   imageUrl: string;
   index: number;
   articles?: Article[];
+  writing: boolean;
 }
 
 interface Article {
@@ -17,69 +18,40 @@ import { useRef } from "react";
 import Markdown from "react-markdown";
 import ArticleHeroComponent from "./ArticleHeroComponent";
 // 3. Define the 'StreamingComponent' functional component that renders the 'currentLlmResponse'
-const StreamingComponent = ({
-  currentLlmResponse,
-}: {
-  currentLlmResponse: string;
-}) => {
-  console.log("StreamingComponent");
-  return (
-    <>
-      {currentLlmResponse && (
-        <div
-          id="currentLlmResponse"
-          className=" bg-white shadow-lg rounded-lg p-4 mt-4"
-        >
-          <div className="flex items-center">
-            <h2 className="text-lg font-semibold flex-grow  text-black">
-              Svar
-            </h2>
-            <img src="./groq.png" alt="groq logo" className="w-6 h-6" />
-          </div>
 
-          <div className=" text-gray-800">
-            <Markdown
-              components={{
-                h1: "h3",
-                h2: "h3",
-                h3: "h4",
-                p(props) {
-                  const { node, ...rest } = props;
-                  return <p style={{ padding: "12px" }} {...rest} />;
-                },
-                strong: "b",
-              }}
-            >
-              {currentLlmResponse}
-            </Markdown>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
-
+const WritingComponent = ({ tokens }: { tokens: number }) => (
+  <div className="flex flex-col items-center py-4 w-full px-4">
+    <div className="w-full h-2 bg-gray-200 rounded-full mb-2">
+      <div
+        className="h-full bg-gray-500 rounded-full transition-all duration-300"
+        style={{ width: `${Math.min((tokens / 500) * 100, 100)}%` }}
+      />
+    </div>
+    <div className="text-gray-500">Sammanställer din artikel...</div>
+  </div>
+);
 // 4. Define the 'LLMResponseComponent' functional component that takes 'llmResponse', 'currentLlmResponse', and 'index' as props
 const LLMResponseComponent = ({
   llmResponse,
-  currentLlmResponse,
   articles,
+  writing = true,
 }: LLMResponseComponentProps) => {
   const articleRef = useRef<HTMLDivElement>(null);
   // 5. Check if 'llmResponse' is not empty
-  const hasLlmResponse = llmResponse && llmResponse.trim().length > 0;
-  console.log("LLMResponseComponent", articles);
   return (
     <>
-      {hasLlmResponse ? (
-        // 6. If 'llmResponse' is not empty, render a div with the 'Markdown' component
-        <div className=" bg-white shadow-lg rounded-lg  mt-4">
+      <div className=" bg-white shadow-lg rounded-lg  mt-4">
+        {writing ? (
+          <WritingComponent tokens={llmResponse.split(" ").length} />
+        ) : (
           <div
             id="hasLlmResponse"
             ref={articleRef}
-            className=" text-gray-800 p-4"
+            className=" text-gray-800 p-4 transition-opacity duration-500 opacity-100 animate-fade-in"
           >
-            {articles && <ArticleHeroComponent articles={articles} />}
+            {articles && llmResponse.length > 0 && (
+              <ArticleHeroComponent articles={articles} />
+            )}
             <Markdown
               components={{
                 h1: "h3",
@@ -95,12 +67,8 @@ const LLMResponseComponent = ({
               {llmResponse}
             </Markdown>
           </div>
-        </div>
-      ) : (
-        // 7. If 'llmResponse' is empty, render the 'StreamingComponent' with 'currentLlmResponse'
-        <StreamingComponent currentLlmResponse={currentLlmResponse} />
-      )}
-      {/* <button onClick={handleGeneratePDF}>Generate PDF</button>; */}
+        )}
+      </div>
     </>
   );
 };

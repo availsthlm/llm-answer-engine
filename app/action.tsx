@@ -8,6 +8,7 @@ import "server-only";
 // 1.5 Configuration file for inference model, embeddings model, and other parameters
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import { config } from "./config";
+import { StreamMessage } from "./page";
 // 2. Determine which embeddings mode and which inference model to use based on the config.tsx. Currently suppport for OpenAI, Groq and partial support for Ollama embeddings and inference
 let openai: OpenAI;
 
@@ -157,8 +158,9 @@ async function myAction(userMessage: string): Promise<any> {
   //Array of queries
   const queries = await rewriteQuery(userMessage);
   console.log("Queries", queries);
-  const streamable = createStreamableValue({});
+  const streamable = createStreamableValue<StreamMessage>({});
   (async () => {
+    streamable.update({ status: "searching" });
     const [articles, articles2, articles3, articles4] = await Promise.all([
       getSourcesFromPinecone(userMessage),
       getSourcesFromPinecone(queries[0]),
@@ -166,30 +168,45 @@ async function myAction(userMessage: string): Promise<any> {
       getSourcesFromPinecone(queries[2]),
     ]);
 
-    const allArticles = articles.concat(articles2, articles3, articles4);
+    const allArticles = [
+      ...new Set(
+        [...articles, ...articles2, ...articles3, ...articles4]
+          .filter((article) => article.score && article.score > 0.7)
+          .map((article) => JSON.stringify(article))
+      ),
+    ].map((str) => JSON.parse(str));
 
-    const sources = allArticles
-      .filter((article) => article.score && article.score > 0.6)
-      .map((article) => ({
-        title: article.title,
-        link: article.link,
-        favicon: article.favicon,
-        cover: article.cover,
-      }));
+    console.log(
+      "All articles",
+      allArticles.map((a) => {
+        return `${a.title} ${a.date}, ${a.score}`;
+      })
+    );
+
+    const sources = allArticles.map((article) => ({
+      title: article.title,
+      link: article.link,
+      favicon: article.favicon,
+      cover: article.cover,
+      date: article.date
+        ? new Date(article.date).getFullYear().toString()
+        : null,
+    }));
 
     const uniqueSources = [
       ...new Map(sources.map((item) => [JSON.stringify(item), item])).values(),
     ];
 
-    streamable.update({ articleResults: uniqueSources });
-
-    const vectorResults = articles
+    const vectorResults = allArticles
       .map(
         (article) => `RUBRIK:${article.title},   INNEHÅLL:${article.content}`
       )
-      .join(" ");
+      .join("\n");
+    // Add article results to the streamable value
+    streamable.update({ articleResults: uniqueSources });
 
     const queryIntent = await findQueryIntent(userMessage);
+    streamable.update({ status: "answering" });
     const messages: ChatCompletionMessageParam[] = [
       {
         role: "system",

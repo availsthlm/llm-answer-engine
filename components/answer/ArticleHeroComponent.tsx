@@ -64,11 +64,6 @@ const ArticleHeroComponent = memo(({ articles }: { articles: Article[] }) => {
                   onLoad={() => handleFaviconLoad(index)}
                 />
               </div>
-              <div className="p-3">
-                <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                  {result.title}
-                </p>
-              </div>
             </div>
           ))
         )}
