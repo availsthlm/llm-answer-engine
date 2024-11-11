@@ -8,7 +8,7 @@ import { useCookies } from "next-client-cookies";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type AI } from "./action";
 // Custom components
-
+import { ChatScrollAnchor } from "@/lib/hooks/chat-scroll-anchor";
 //import { useSession } from "next-auth/react";
 import AccessDenied from "@/components/AccessDenied";
 import { SearchResult } from "@/components/answer/ArticleResultsComponent";
@@ -243,10 +243,10 @@ export default function Page() {
           ))}
         </div>
       )}
-      {/*<div className="pb-[80px] pt-4 md:pt-10">
-        <ChatScrollAnchor trackVisibility={true} />
+      <div className="pb-[80px] pt-4 md:pt-10">
+        <ChatScrollAnchor trackVisibility={false} />
       </div>
-       {messages.length === 1 && (
+      {/* {messages.length === 1 && (
                 <div className="flex justify-center py-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
                 </div>

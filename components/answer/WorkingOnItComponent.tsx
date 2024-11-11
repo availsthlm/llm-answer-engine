@@ -33,7 +33,9 @@ const WorkingOnItComponent = ({
             <span className="animate-[ellipsis_1.5s_steps(4,end)_infinite]">
               ...
             </span>
+            <span className="animate-spin rounded-full h-3 w-3 border-t-1 border-b-1 border-primary"></span>
           </span>
+          
         </div>
       )}
     </div>
