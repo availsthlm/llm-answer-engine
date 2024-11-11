@@ -44,29 +44,35 @@ if (config.useOllamaEmbeddings) {
 }
 
 async function getSourcesFromPinecone(question: string) {
-  // Target the index
-  const indexName = "chef-index";
-  const index = pineconeClient.index<any>(indexName);
+  try {
+    const indexName = "chef-index";
+    const index = pineconeClient.index<any>(indexName);
+    const query = await embeddings.embedQuery(question);
 
-  const query = await embeddings.embedQuery(question);
+    const results = await index.query({
+      vector: query,
+      topK: 4,
+      includeMetadata: true,
+      includeValues: true,
+    });
 
-  // Query the index using the query embedding
-  const results = await index.query({
-    vector: query,
-    topK: 4,
-    includeMetadata: true,
-    includeValues: true,
-  });
+    if (!results.matches) {
+      throw new Error("No matches found in Pinecone");
+    }
 
-  return results.matches?.map((match) => ({
-    title: match.metadata?.title,
-    content: match.metadata?.content,
-    link: match.metadata?.link,
-    favicon: match.metadata?.thumbnail_url,
-    cover: match.metadata?.full_image_url,
-    score: match.score,
-    date: match.metadata?.date,
-  }));
+    return results.matches.map((match) => ({
+      title: match.metadata?.title || "Untitled",
+      content: match.metadata?.content || "No content available",
+      link: match.metadata?.link,
+      favicon: match.metadata?.thumbnail_url,
+      cover: match.metadata?.full_image_url,
+      score: match.score,
+      date: match.metadata?.date,
+    }));
+  } catch (error) {
+    console.error("Error in getSourcesFromPinecone:", error);
+    return [];
+  }
 }
 
 const relevantQuestions = async (
@@ -118,29 +124,41 @@ const relevantQuestions = async (
  *
  */
 const rewriteQuery = async (text: string) => {
-  const messages: ChatCompletionMessageParam[] = [
-    {
-      role: "system",
-      content: `You are a helpful assistant that generates multiple search queries based on a  single input query. Generate 3 search queries, related to the user query. The response format MUST be a json aobject { queries: [ "query 1", "query 2", "query 3"]} 
-                       `,
-    },
-    {
-      role: "user",
-      content: `${text} `,
-    },
-  ];
+  try {
+    if (!text?.trim()) {
+      throw new Error("Empty query provided");
+    }
 
-  const response = await openai.chat.completions.create({
-    messages: messages,
-    stream: false,
-    model: config.inferenceModel,
-    response_format: { type: "json_object" },
-  });
-  if (response.choices[0].message.content) {
-    const jsonObject = JSON.parse(response.choices[0].message.content);
-    return jsonObject["queries"];
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: `You are a helpful assistant that generates multiple search queries based on a  single input query. Generate 3 search queries, related to the user query. The response format MUST be a json aobject { queries: [ "query 1", "query 2", "query 3"]} 
+                       `,
+      },
+      {
+        role: "user",
+        content: `${text} `,
+      },
+    ];
+
+    const response = await openai.chat.completions.create({
+      messages: messages,
+      stream: false,
+      model: config.inferenceModel,
+      response_format: { type: "json_object" },
+    });
+
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content in response");
+    }
+
+    const jsonObject = JSON.parse(content);
+    return jsonObject["queries"] || [];
+  } catch (error) {
+    console.error("Error in rewriteQuery:", error);
+    return [text]; // fallback to original query
   }
-  return response.choices[0].message.content;
 };
 
 const findQueryIntent = async (text: string) => {
@@ -229,62 +247,86 @@ Always verify factual accuracy and context while summarizing.
 // 10. Main action function that orchestrates the entire process
 async function myAction(userMessage: string): Promise<any> {
   "use server";
-  //Array of queries
-  const queries = await rewriteQuery(userMessage);
-  console.log("Queries", queries);
+
   const streamable = createStreamableValue<StreamMessage>({});
-  (async () => {
+
+  try {
+    if (!userMessage?.trim()) {
+      throw new Error("Empty user message");
+    }
+
+    const queries = await rewriteQuery(userMessage);
+    console.log("Queries", queries);
+
     streamable.update({ status: "searching" });
-    const [articles, articles2, articles3, articles4] = await Promise.all([
-      getSourcesFromPinecone(userMessage),
-      getSourcesFromPinecone(queries[0]),
-      getSourcesFromPinecone(queries[1]),
-      getSourcesFromPinecone(queries[2]),
-    ]);
+    (async () => {
+      try {
+        const [articles, articles2, articles3, articles4] = await Promise.all([
+          getSourcesFromPinecone(userMessage),
+          getSourcesFromPinecone(queries[0]),
+          getSourcesFromPinecone(queries[1]),
+          getSourcesFromPinecone(queries[2]),
+        ]);
 
-    const allArticles = [
-      ...new Set(
-        [...articles, ...articles2, ...articles3, ...articles4]
-          .filter((article) => article.score && article.score > 0.6)
-          .map((article) => JSON.stringify(article))
-      ),
-    ].map((str) => JSON.parse(str));
+        const allArticles = [
+          ...new Set(
+            [...articles, ...articles2, ...articles3, ...articles4]
+              .filter((article) => article.score && article.score > 0.7)
+              .map((article) => JSON.stringify(article))
+          ),
+        ].map((str) => JSON.parse(str));
 
-    console.log(
-      "All articles",
-      allArticles.map((a) => {
-        return `${a.title} ${a.date}, ${a.score}`;
-      })
-    );
+        // Add check for empty articles
+        console.log("All articles", allArticles.length);
+        if (allArticles.length === 0) {
+          streamable.update({
+            status: "done",
+            llmResponse:
+              "Jag kunde tyvärr inte hitta några relevanta artiklar för din fråga. Försök gärna omformulera dig eller var mer specifik.",
+            llmResponseEnd: true,
+          });
+          streamable.done({ status: "done" });
+          return streamable.value;
+        }
 
-    const sources = allArticles.map((article) => ({
-      title: article.title,
-      link: article.link,
-      favicon: article.favicon,
-      cover: article.cover,
-      date: article.date
-        ? new Date(article.date).getFullYear().toString()
-        : null,
-    }));
+        console.log(
+          "All articles",
+          allArticles.map((a) => {
+            return `${a.title} ${a.date}, ${a.score}`;
+          })
+        );
 
-    const uniqueSources = [
-      ...new Map(sources.map((item) => [JSON.stringify(item), item])).values(),
-    ];
+        const sources = allArticles.map((article) => ({
+          title: article.title,
+          link: article.link,
+          favicon: article.favicon,
+          cover: article.cover,
+          date: article.date
+            ? new Date(article.date).getFullYear().toString()
+            : null,
+        }));
 
-    const vectorResults = allArticles
-      .map(
-        (article) => `RUBRIK:${article.title},   INNEHÅLL:${article.content}`
-      )
-      .join("\n");
-    // Add article results to the streamable value
-    streamable.update({ articleResults: uniqueSources });
+        const uniqueSources = [
+          ...new Map(
+            sources.map((item) => [JSON.stringify(item), item])
+          ).values(),
+        ];
 
-    const queryIntent = await findQueryIntent(userMessage);
-    streamable.update({ status: "answering" });
-    const messages: ChatCompletionMessageParam[] = [
-      {
-        role: "system",
-        content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage}.
+        const vectorResults = allArticles
+          .map(
+            (article) =>
+              `RUBRIK:${article.title},   INNEHÅLL:${article.content}`
+          )
+          .join("\n");
+        // Add article results to the streamable value
+        streamable.update({ articleResults: uniqueSources });
+
+        const queryIntent = await findQueryIntent(userMessage);
+        streamable.update({ status: "answering" });
+        const messages: ChatCompletionMessageParam[] = [
+          {
+            role: "system",
+            content: `Du är en erfaren journalist på tidningen Chef och har precis fått i uppdrag att skriva en artikel på 3000 tecken som besvarar frågan: ${userMessage}.
                         Tänkbara vinklar på frågan kan vara: ${queries.join(",")}.
                         Intentionen från din redaktör är att du ska skriva så att det här besvaras: ${queryIntent}.
                         Tänk på att Chef är en tidning inrikat på ledarskap och karriär.
@@ -298,51 +340,77 @@ async function myAction(userMessage: string): Promise<any> {
                         Exkludera datum och byline. 
                         Använd markdown format i din text. Detta är mycket viktigt! 
                        `,
-      },
-      {
-        role: "user",
-        content: `Använd endast information efter CONTEXT för att skriva artikeln. 
+          },
+          {
+            role: "user",
+            content: `Använd endast information efter CONTEXT för att skriva artikeln. 
         Om du inte hittar något relevant innehåll efter CONTEXT, så be användaren om att skriva om frågan.
         Informationen efter context är ett antal artiklar, varje artikel börjar med en RUBRIK följt av INNEHÅLL.
         Om möjligt, inkludera källor och citat från  för att stödja dina påståenden.  
         En bra artikel kommer lyfta din karriär till nya höjder. Lycka till!  
         CONTEXT: ${JSON.stringify(vectorResults)}. `,
-      },
-    ];
+          },
+        ];
 
-    const chatCompletion = await openai.chat.completions.create({
-      messages: messages,
-      stream: true,
-      model: config.inferenceModel,
-    });
-    // console.log("Start reading chat completion");
-    let completeResponse = "";
-    for await (const chunk of chatCompletion) {
-      if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
-        completeResponse += chunk.choices[0].delta.content || ""; // Accumulate the complete response
-
-        streamable.update({
-          llmResponse: chunk.choices[0].delta.content,
+        const chatCompletion = await openai.chat.completions.create({
+          messages: messages,
+          stream: true,
+          model: config.inferenceModel,
         });
-      } else if (chunk.choices[0].finish_reason === "stop") {
-        streamable.update({ llmResponseEnd: true });
+        // console.log("Start reading chat completion");
+        let completeResponse = "";
+        for await (const chunk of chatCompletion) {
+          if (
+            chunk.choices[0].delta &&
+            chunk.choices[0].finish_reason !== "stop"
+          ) {
+            completeResponse += chunk.choices[0].delta.content || ""; // Accumulate the complete response
 
-        const summary = await generateSummary(completeResponse);
+            streamable.update({
+              llmResponse: chunk.choices[0].delta.content,
+            });
+          } else if (chunk.choices[0].finish_reason === "stop") {
+            streamable.update({ llmResponseEnd: true });
+
+            const summary = await generateSummary(completeResponse);
+            streamable.update({
+              summary: summary,
+            });
+
+            const followUp = await relevantQuestions(
+              userMessage,
+              completeResponse
+            );
+            streamable.update({ followUp: followUp });
+          }
+        }
+
+        streamable.done({ status: "done" });
+      } catch (error) {
+        console.error("Error fetching articles:", error);
         streamable.update({
-          summary: summary,
+          status: "done",
+          llmResponse:
+            "Ett fel uppstod när vi försökte hämta artiklar. Vänligen försök igen senare.",
+          llmResponseEnd: true,
         });
-
-        const followUp = await relevantQuestions(userMessage, completeResponse);
-        streamable.update({ followUp: followUp });
+        streamable.done({ status: "done" });
+        return streamable.value;
       }
-    }
-
+    })();
+  } catch (error) {
+    console.error("Error in myAction:", error);
+    streamable.update({
+      status: "done",
+      llmResponse: "Ett oväntat fel uppstod. Vänligen försök igen senare.",
+      llmResponseEnd: true,
+    });
     streamable.done({ status: "done" });
-  })();
-  // console.log("Returning streamable value");
+  }
 
   return streamable.value;
 }
+
 // 11. Define initial AI and UI states
 const initialAIState: {
   role: "user" | "assistant" | "system" | "function";
