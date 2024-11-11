@@ -16,22 +16,6 @@ import WorkingOnItComponent from "@/components/answer/WorkingOnItComponent";
 import InputArea from "@/components/InputArea";
 import Suggestions from "@/components/start/Suggestions";
 
-interface Message {
-  id: number;
-  type: string;
-  content: string;
-  userMessage: string;
-  summary?: string | null;
-  images: Image[];
-  videos: Video[];
-  cover: string;
-  followUp: FollowUp | null;
-  isStreaming: boolean;
-  searchResults?: SearchResult[];
-  articleResults?: SearchResult[];
-
-  status?: "done" | "searching" | "answering";
-}
 export interface StreamMessage {
   articleResults?: any;
   searchResults?: any;
@@ -209,7 +193,14 @@ export default function Page() {
             >
               <div className="w-full md:w-3/4 md:pr-2">
                 {message.type === "userMessage" && (
-                  <UserMessageComponent message={message.userMessage} />
+                  <div
+                    ref={(el) => {
+                      if (el && index === messages.length - 1) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}>
+                    <UserMessageComponent message={message.userMessage} />
+                  </div>
                 )}
 
                 <WorkingOnItComponent
