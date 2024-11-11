@@ -29,6 +29,24 @@ export interface StreamMessage {
   followUp?: any;
   status?: "done" | "searching" | "answering";
 }
+
+interface Message {
+  id: number;
+  type: string;
+  content: string;
+  userMessage: string;
+  summary?: string | null;
+  images: Image[];
+  videos: Video[];
+  cover: string;
+  followUp: FollowUp | null;
+  isStreaming: boolean;
+  searchResults?: SearchResult[];
+  articleResults?: SearchResult[];
+
+  status?: "done" | "searching" | "answering";
+}
+
 interface Image {
   link: string;
 }
