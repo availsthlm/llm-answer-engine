@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const referer = request.headers.get("referer");
   console.log("referer", referer);
   const response = NextResponse.next();
-
+  return response;
   // Set Content-Security-Policy header
   response.headers.set(
     "Content-Security-Policy",
