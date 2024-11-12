@@ -6,10 +6,20 @@ export function middleware(request: NextRequest) {
   console.log("referer", referer);
   const response = NextResponse.next();
 
+  // Define allowed hostnames
+  const allowedHostnames = [
+    "localhost",
+    "127.0.0.1",
+    "ewymsu.availsthlms.se",
+    "chef.se",
+  ]; // Add more domains as needed
+
   // Set Content-Security-Policy header
   response.headers.set(
     "Content-Security-Policy",
-    "frame-ancestors 'self' http://localhost:3000"
+    // This CSP directive controls which parent pages can embed this page in an iframe
+    // 'self' allows the same origin, and localhost:3000 is explicitly allowed
+    `frame-ancestors 'self' ${allowedHostnames.map((hostname) => `http://${hostname} https://${hostname}`).join(" ")}`
   );
 
   // Set X-Frame-Options for older browsers
@@ -19,7 +29,7 @@ export function middleware(request: NextRequest) {
   if (referer) {
     try {
       const refererUrl = new URL(referer);
-      if (refererUrl.hostname !== "localhost") {
+      if (!allowedHostnames.includes(refererUrl.hostname)) {
         return new NextResponse(null, { status: 403 });
       }
     } catch (error) {
