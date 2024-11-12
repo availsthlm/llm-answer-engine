@@ -6,25 +6,17 @@ export function middleware(request: NextRequest) {
   console.log("referer", referer);
   const response = NextResponse.next();
 
-  // Define allowed hostnames
-  const allowedHostnames = [
-    "localhost:3000",
-    "127.0.0.1:5500",
-    "ewymsu.availsthlm.se",
-    "chef.se",
-    "chef-x.vercel.app",
-  ]; // Add more domains as needed
-
   // Set Content-Security-Policy header
   response.headers.set(
     "Content-Security-Policy",
-    // This CSP directive controls which parent pages can embed this page in an iframe
-    // 'self' allows the same origin, and localhost:3000 is explicitly allowed
-    `frame-ancestors 'self' ${allowedHostnames.map((hostname) => `http://${hostname} https://${hostname}`).join(" ")}`
+    `frame-ancestors 'self' http://localhost:3000 http://127.0.0.1:5500`
   );
 
   // Set X-Frame-Options for older browsers
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
+
+  // Define allowed hostnames
+  const allowedHostnames = ["localhost", "127.0.0.1"]; // Add more domains as needed
 
   // Check if the request is coming from an allowed domain
   if (referer) {
