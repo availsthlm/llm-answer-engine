@@ -10,6 +10,7 @@ import { type AI } from "./action";
 // Custom components
 import { ChatScrollAnchor } from "@/lib/hooks/chat-scroll-anchor";
 //import { useSession } from "next-auth/react";
+import { SearchResult } from "@/components/answer/ArticleResultsComponent";
 import WorkingOnItComponent from "@/components/answer/WorkingOnItComponent";
 import InputArea from "@/components/InputArea";
 import Suggestions from "@/components/start/Suggestions";
@@ -62,7 +63,6 @@ interface FollowUp {
 }
 
 export default function Page() {
-  const cookies = useCookies();
   // 3. Set up action that will be used to stream all the messages
   const { myAction } = useActions<typeof AI>();
   // 4. Set up form submission handling
