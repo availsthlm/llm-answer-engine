@@ -10,8 +10,6 @@ import { type AI } from "./action";
 // Custom components
 import { ChatScrollAnchor } from "@/lib/hooks/chat-scroll-anchor";
 //import { useSession } from "next-auth/react";
-import AccessDenied from "@/components/AccessDenied";
-import { SearchResult } from "@/components/answer/ArticleResultsComponent";
 import WorkingOnItComponent from "@/components/answer/WorkingOnItComponent";
 import InputArea from "@/components/InputArea";
 import Suggestions from "@/components/start/Suggestions";
@@ -198,7 +196,6 @@ export default function Page() {
       console.error("Error streaming data for user message:", error);
     }
   };
-  if (!cookies.get("auth")) return <AccessDenied />;
 
   return (
     <div>
@@ -214,9 +211,10 @@ export default function Page() {
                   <div
                     ref={(el) => {
                       if (el && index === messages.length - 1) {
-                      el.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}>
+                        el.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                  >
                     <UserMessageComponent message={message.userMessage} />
                   </div>
                 )}
