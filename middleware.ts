@@ -3,8 +3,24 @@ import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const referer = request.headers.get("referer");
-  console.log("referer", referer);
+  console.log("[middleware]referer", referer);
+
+  // Check if the request is coming from chef.se, localhost, or availsthlm.se
+  const allowedReferers = ["chef.se", "localhost", "availsthlm.se"];
+  const isAllowed = allowedReferers.some((domain) => referer?.includes(domain));
+
+  if (!isAllowed) {
+    return new NextResponse("Access denied", { status: 403 });
+  }
+
   const response = NextResponse.next();
+
+  // Add Content-Security-Policy header to only allow embedding from specified domains
+  response.headers.set(
+    "Content-Security-Policy",
+    "frame-ancestors https://chef.se https://availsthlm.se http://localhost"
+  );
+
   return response;
 }
 
