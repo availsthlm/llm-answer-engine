@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   // Add Content-Security-Policy header to only allow embedding from specified domains
   response.headers.set(
     "Content-Security-Policy",
-    "frame-ancestors https://chef.se https://availsthlm.se http://localhost"
+    "frame-ancestors https://chef.se https://ewymsu.availsthlm.se http://localhost"
   );
 
   return response;
