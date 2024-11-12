@@ -2,11 +2,18 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
+  console.log("[middleware]request", request.headers);
   const referer = request.headers.get("referer");
   console.log("[middleware]referer", referer);
 
   // Check if the request is coming from chef.se, localhost, or availsthlm.se
-  const allowedReferers = ["chef.se", "localhost", "availsthlm.se"];
+  const allowedReferers = [
+    "chef.se",
+    "127.0.0.1",
+    "availsthlm.se",
+    "localhost",
+    "chef-x.vercel.app",
+  ];
   const isAllowed = allowedReferers.some((domain) => referer?.includes(domain));
 
   if (!isAllowed) {
@@ -18,7 +25,7 @@ export function middleware(request: NextRequest) {
   // Add Content-Security-Policy header to only allow embedding from specified domains
   response.headers.set(
     "Content-Security-Policy",
-    "frame-ancestors https://chef.se https://ewymsu.availsthlm.se http://localhost"
+    "frame-ancestors https://chef.se https://ewymsu.availsthlm.se http://127.0.0.1:5500/"
   );
 
   return response;
