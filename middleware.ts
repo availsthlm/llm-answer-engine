@@ -8,9 +8,9 @@ export function middleware(request: NextRequest) {
 
   // Define allowed hostnames
   const allowedHostnames = [
-    "localhost",
-    "127.0.0.1",
-    "ewymsu.availsthlms.se",
+    "localhost:3000",
+    "127.0.0.1:5500",
+    "ewymsu.availsthlm.se",
     "chef.se",
   ]; // Add more domains as needed
 
