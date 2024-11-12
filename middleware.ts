@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     "127.0.0.1:5500",
     "ewymsu.availsthlm.se",
     "chef.se",
+    "chef-x.vercel.app",
   ]; // Add more domains as needed
 
   // Set Content-Security-Policy header
