@@ -45,7 +45,7 @@ if (config.useOllamaEmbeddings) {
 
 async function getSourcesFromPinecone(question: string) {
   try {
-    const indexName = "chef-index";
+    const indexName = "chef-20241116";
     const index = pineconeClient.index<any>(indexName);
     const query = await embeddings.embedQuery(question);
 
