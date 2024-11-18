@@ -2,9 +2,9 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-  console.log("[middleware]request", request.headers);
+  //console.log("[middleware]request", request.headers);
   const referer = request.headers.get("referer");
-  console.log("[middleware]referer", referer);
+  //console.log("[middleware]referer", referer);
 
   // Check if the request is coming from chef.se, localhost, or availsthlm.se
   const allowedReferers = [

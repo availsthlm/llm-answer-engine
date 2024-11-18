@@ -271,7 +271,7 @@ async function myAction(userMessage: string): Promise<any> {
         const allArticles = [
           ...new Set(
             [...articles, ...articles2, ...articles3, ...articles4]
-              .filter((article) => article.score && article.score > 0.7)
+              .filter((article) => article.score && article.score > 0.5)
               .map((article) => JSON.stringify(article))
           ),
         ].map((str) => JSON.parse(str));
