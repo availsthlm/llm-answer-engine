@@ -54,7 +54,7 @@ const ArticleHeroComponent = memo(({ articles }: { articles: Article[] }) => {
         ) : (
           visibleResults.map((result, index) => (
             <div className=" overflow-hidden">
-              <div className="aspect-[4/3] relative bg-gray-100">
+              <div className="aspect-video relative bg-gray-100">
                 <img
                   src={result.favicon || "/favicon-16x16.png"}
                   alt="favicon"

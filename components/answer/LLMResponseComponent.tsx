@@ -50,10 +50,23 @@ const LLMResponseComponent = ({
           )}
           <Markdown
             components={{
-              h1: "h3",
-              h2: "h3",
-              h3: "h4",
-              p(props) {
+              h1: (props) => {
+                const { node, ...rest } = props;
+                return <h1 className="text-3xl" {...rest} />;
+              },
+              h2: (props) => {
+                const { node, ...rest } = props;
+                return <h2 className="text-4xl" {...rest} />;
+              },
+              h3: (props) => {
+                const { node, ...rest } = props;
+                return <h3 className="text-xl" {...rest} />;
+              },
+              h4: (props) => {
+                const { node, ...rest } = props;
+                return <h4 className="text-lg" {...rest} />;
+              },
+              p: (props) => {
                 const { node, ...rest } = props;
                 return <p style={{ paddingBottom: "12px" }} {...rest} />;
               },

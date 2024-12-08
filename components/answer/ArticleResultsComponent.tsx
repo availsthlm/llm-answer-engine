@@ -46,7 +46,7 @@ const ArticleResultsComponent = ({
   //const visibleResults = isExpanded ? searchResults : searchResults.slice(0, 4);
   const visibleResults = searchResults
     .filter((result) => result.favicon && result.favicon.trim() !== "")
-    .slice(0, isExpanded ? undefined : 4);
+    .slice(0, isExpanded ? undefined : 3);
 
   // 9. Define the 'handleFaviconLoad' function to update the 'loadedFavicons' state when a favicon is loaded
   const handleFaviconLoad = (index: number) => {
@@ -63,36 +63,36 @@ const ArticleResultsComponent = ({
   if (searchResults.length === 0) return null;
   return (
     <>
-      <div className="flex items-center mb-4">
-        <h2 className="text-lg font-semibold flex-grow text-black">Källor</h2>
+      <div className="flex items-center mb-2">
+        <h2 className="text-xl font-semibold flex-grow text-black">Källor</h2>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-col space-y-4">
         {visibleResults.map((result, index) => (
           <a
             key={index}
             href={result.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="block hover:bg-gray-50 rounded-lg"
+            className="block hover:bg-gray-50 rounded-md"
           >
-            <div className=" overflow-hidden">
-              <div className="aspect-[4/3] relative bg-gray-100">
+            <div className="flex items-start space-x-4">
+              <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                 <img
                   src={result.favicon || "/favicon-16x16.png"}
-                  alt="favicon"
+                  alt="thumbnail"
                   className={`w-full h-full object-cover ${
                     result.favicon ? "" : "grayscale"
                   } ${loadedFavicons[index] ? "block" : "hidden"}`}
                   onLoad={() => handleFaviconLoad(index)}
                 />
-                <div className="p-2">
-                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                    {result.title}
-                  </p>
-                  <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                    Publicerad: {result.date}
-                  </p>
-                </div>
+              </div>
+              <div className="flex-grow">
+                <p className="text-lg font-semibold text-gray-900">
+                  {result.title}
+                </p>
+                <p className="text-md text-gray-600">
+                  Publicerad: {result.date}
+                </p>
               </div>
             </div>
           </a>
